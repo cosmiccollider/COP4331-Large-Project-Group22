@@ -23,13 +23,17 @@ class PROJECT_API AFirstPersonCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* DefaultMappingContext;
 
+	// Move Input Action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* MoveAction;
+
 	// Jump Input Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* JumpAction;
 
-	// Move Input Action
+	// Crouch Input Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		class UInputAction* MoveAction;
+		class UInputAction* CrouchAction;
 
 public:
 	// Sets default values for this character's properties
@@ -48,11 +52,15 @@ public:
 		class UInputAction* LookAction;
 
 protected:
-	// Called for movement input
-	void Move(const FInputActionValue& Value);
-
 	// Called for looking input
 	void Look(const FInputActionValue& Value);
+
+	// Called for moving input
+	void Move(const FInputActionValue& Value);
+
+	// Called for crouching input
+	void StartCrouch();
+	void StopCrouch();
 
 protected:
 	// APawn interface
