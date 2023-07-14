@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "AFloatingActor.generated.h"
+#include "FloatingActor.generated.h"
 
 UCLASS()
 class PROJECT_API AFloatingActor : public AActor

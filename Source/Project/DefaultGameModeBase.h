@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "AMenuGameModeBase.generated.h"
+#include "DefaultGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_API AMenuGameModeBase : public AGameModeBase
+class PROJECT_API ADefaultGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 public:
-	AMenuGameModeBase();
+	ADefaultGameModeBase();
 };
