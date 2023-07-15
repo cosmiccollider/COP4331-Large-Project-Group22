@@ -2,14 +2,15 @@
 
 
 #include "DefaultGameModeBase.h"
-#include "FirstPersonCharacter.h"
+#include "DefaultCharacter.h"
 #include "DefaultHUD.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADefaultGameModeBase::ADefaultGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<APawn> FirstPersonCharacterFinder(TEXT("/Game/Characters/BP_FirstPersonCharacter.BP_FirstPersonCharacter_C"));
-	if (FirstPersonCharacterFinder.Succeeded()) DefaultPawnClass = FirstPersonCharacterFinder.Class;
+	/*static ConstructorHelpers::FClassFinder<APawn> DefaultCharacterFinder(TEXT("/Game/Characters/BP_FirstPersonCharacter.BP_FirstPersonCharacter_C"));
+	if (DefaultCharacterFinder.Succeeded()) DefaultPawnClass = DefaultCharacterFinder.Class;*/
 
+	DefaultPawnClass = ADefaultCharacter::StaticClass();
 	HUDClass = ADefaultHUD::StaticClass();
 }

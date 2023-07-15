@@ -5,100 +5,99 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "FirstPersonCharacter.generated.h"
+#include "DefaultCharacter.generated.h"
 
 class UCameraComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
 class UPauseMenuUserWidget;
+class UPhysicsConstraintComponent;
+class UPhysicsHandleComponent;
 
 UCLASS()
-class PROJECT_API AFirstPersonCharacter : public ACharacter
+class PROJECT_API ADefaultCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AFirstPersonCharacter();
+	ADefaultCharacter();
 
-	// Class Variables
-	bool inPauseMenu;
-	//bool isGrabbing;
-	//bool isRotating;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// First Person Camera
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		UCameraComponent* Camera;
+
+	// Physics Constraint
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UPhysicsConstraintComponent* PhysicsConstraint;
+
+	// Physics Handle
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UPhysicsHandleComponent* PhysicsHandle;
+
+	// Pause Menu
+	UPROPERTY(VisibleAnywhere)
 		TSubclassOf<UPauseMenuUserWidget> PauseMenuClass;
 
 	UPROPERTY()
 		UPauseMenuUserWidget* PauseMenu;
 
-	// First Person Camera
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		UCameraComponent* FirstPersonCameraComponent;
-
-	// Default Mapping Context
+	// Default Mapping Context and Input Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputMappingContext* DefaultMappingContext;
 
-	// Crouch Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* CrouchAction;
 
-	// Jump Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* JumpAction;
 
-	// Look Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* LookAction;
 
-	// Move Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* MoveAction;
 
-	// Pause Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* PauseAction;
 
-	// Primary Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* PrimaryAction;
 
-	// Secondary Action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* SecondaryAction;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// Class Variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bCanLook;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bInPauseMenu;
 
-	// Returns FirstPersonCameraComponent subobject
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsGrabbing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsRotating;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// APawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-
-	// Called for crouch input
+	// Input Action functions
 	void ToggleCrouch();
-
-	// Called for look input
 	void Look(const FInputActionValue& Value);
-
-	// Called for move input
 	void Move(const FInputActionValue& Value);
-
-	// Called for pause input
 	void Pause();
-
-	// Called for primary input
 	void StartPrimary();
 	void StopPrimary();
-
-	// Called for secondary input
 	void StartSecondary();
 	void StopSecondary();
 };

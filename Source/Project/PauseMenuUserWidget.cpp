@@ -3,7 +3,7 @@
 
 #include "PauseMenuUserWidget.h"
 #include "Components/Button.h"
-#include "FirstPersonCharacter.h"
+#include "DefaultCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -17,19 +17,23 @@ void UPauseMenuUserWidget::NativeConstruct()
 	if (Desktop_Button) Desktop_Button->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Desktop);
 }
 
-// Pause Menu Functions
 void UPauseMenuUserWidget::Resume()
 {
 	APlayerController* PController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	AFirstPersonCharacter* PCharacter = Cast<AFirstPersonCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	ADefaultCharacter* PCharacter = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
+	// Remove Pause Menu from the screen
 	PCharacter->PauseMenu->RemoveFromParent();
 	PCharacter->PauseMenu = nullptr;
+
+	// Set input mode to Game and hide the mouse cursor
 	FInputModeGameOnly InputMode;
 	PController->SetInputMode(InputMode);
 	PController->SetShowMouseCursor(false);
+
+	// Set game to unpaused
 	UGameplayStatics::SetGamePaused(GetWorld(), false);
-	PCharacter->inPauseMenu = false;
+	PCharacter->bInPauseMenu = false;
 }
 
 void UPauseMenuUserWidget::MainMenu()
