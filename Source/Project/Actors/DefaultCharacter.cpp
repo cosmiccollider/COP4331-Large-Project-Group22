@@ -14,14 +14,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "PauseMenuUserWidget.h"
+#include "UI/PauseMenuUserWidget.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 #define HOLD_DISTANCE 200;
-#define ROTATION_MODIFIER 2.0f;
+#define ROTATION_SENSITIVITY 0.5f;
 #define TRACE_DISTANCE 400;
+
+// ==================== Character ====================
 
 // Sets default values
 ADefaultCharacter::ADefaultCharacter()
@@ -69,30 +71,15 @@ ADefaultCharacter::ADefaultCharacter()
 	static ConstructorHelpers::FObjectFinder<UInputAction> SecondaryActionFinder(TEXT("/Game/Input/Actions/IA_Secondary.IA_Secondary"));
 	if (SecondaryActionFinder.Succeeded()) SecondaryAction = SecondaryActionFinder.Object;
 
-	// Set Class Variables
+	// Set class variables
 	bCanLook = true;
 	bInPauseMenu = false;
 	bIsGrabbing = false;
 	bIsRotating = false;
 
-	// Set Pause Menu Widget Class
+	// Set Pause Menu Widget class
 	static ConstructorHelpers::FClassFinder<UPauseMenuUserWidget> PauseMenuFinder(TEXT("/Game/UI/WBP_PauseMenu.WBP_PauseMenu_C"));
 	if (PauseMenuFinder.Succeeded()) PauseMenuClass = PauseMenuFinder.Class;
-}
-
-// Called when the game starts or when spawned
-void ADefaultCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
 }
 
 // Called every frame
@@ -102,21 +89,8 @@ void ADefaultCharacter::Tick(float DeltaTime)
 
 	if (bIsGrabbing)
 	{
-		FVector HoldDistance = Camera->GetComponentRotation().Vector() * HOLD_DISTANCE;
-		FVector Location = Camera->GetComponentLocation() + HoldDistance;
-		PhysicsHandle->SetTargetLocation(Location);
-
-		if (bIsRotating)
-		{
-			float MouseX;
-			float MouseY;
-			APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			PC->GetMousePosition(MouseX, MouseY);
-			FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
-			float Pitch = (MouseY - (ViewportSize.Y / 2.0f)) / ROTATION_MODIFIER;
-			float Yaw = (MouseX - (ViewportSize.X / 2.0f)) / ROTATION_MODIFIER;
-			PhysicsHandle->SetTargetRotation(UKismetMathLibrary::MakeRotator(0.0f, Pitch, Yaw));
-		}
+		MoveObject();
+		if (bIsRotating) RotateObject();
 	}
 }
 
@@ -154,6 +128,24 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
+// Called when the game starts or when spawned
+void ADefaultCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	// Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+}
+
+// ==================== Input Actions ====================
+
+// Called to toggle crouch input
 void ADefaultCharacter::ToggleCrouch()
 {
 	if (GetCharacterMovement()->IsCrouching())
@@ -167,6 +159,7 @@ void ADefaultCharacter::ToggleCrouch()
 	}
 }
 
+// Called to trigger look input
 void ADefaultCharacter::Look(const FInputActionValue& Value)
 {
 	// Input is a Vector2D
@@ -180,6 +173,7 @@ void ADefaultCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+// Called to trigger move input
 void ADefaultCharacter::Move(const FInputActionValue& Value)
 {
 	// Input is a Vector2D
@@ -193,16 +187,15 @@ void ADefaultCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
+// Called to open or close pause menu widget
 void ADefaultCharacter::Pause()
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	if (PauseMenuClass && !bInPauseMenu)
 	{
-		// Set mouse location to the center of the screen
-		// This is done to so the player doesn't have to spend time finding the mouse when it becomes visible
-		FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
-		PC->SetMouseLocation(UKismetMathLibrary::FTrunc(ViewportSize.X / 2.0f), UKismetMathLibrary::FTrunc(ViewportSize.Y / 2.0f));
+		// Center mouse so the player doesn't have to spend time finding the mouse when it becomes visible
+		SetMouseCenter();
 
 		// Create Pause Menu widget and add it to the screen
 		PauseMenu = CreateWidget<UPauseMenuUserWidget>(PC, PauseMenuClass);
@@ -234,7 +227,44 @@ void ADefaultCharacter::Pause()
 	}
 }
 
+// Called to start primary mouse input
 void ADefaultCharacter::StartPrimary()
+{
+	StartGrab();
+}
+
+// Called to stop primary mouse input
+void ADefaultCharacter::StopPrimary()
+{
+	if (bIsGrabbing) StopGrab();
+}
+
+// Called to start secondary mouse input
+void ADefaultCharacter::StartSecondary()
+{
+	if (bIsGrabbing) StartRotation();
+}
+
+// Called to stop secondary mouse input
+void ADefaultCharacter::StopSecondary()
+{
+	if (bIsRotating) StopRotation();
+}
+
+// ==================== Physics ====================
+
+void ADefaultCharacter::EnableGravity()
+{
+	GetCharacterMovement()->GravityScale = 1;
+}
+
+void ADefaultCharacter::DisableGravity()
+{
+	GetCharacterMovement()->GravityScale = 0;
+}
+
+// Called to start grabbing an object
+void ADefaultCharacter::StartGrab()
 {
 	if (Camera)
 	{
@@ -243,7 +273,7 @@ void ADefaultCharacter::StartPrimary()
 		FVector Start = Camera->GetComponentLocation();
 		FVector End = Start + TraceDistance;
 
-		// Check that the line trace finds a hit result
+		// Create a line trace and check that it finds a hit result
 		FHitResult OutHit;
 		bool LineTrace = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery(), false, TArray<AActor*>(), EDrawDebugTrace::ForDuration, OutHit, true);
 		if (LineTrace && PhysicsHandle)
@@ -258,32 +288,71 @@ void ADefaultCharacter::StartPrimary()
 	}
 }
 
-void ADefaultCharacter::StopPrimary()
+// Called to stop grabbing an object
+void ADefaultCharacter::StopGrab()
 {
-	// If an object is currently grabbed, release it
-	if (bIsGrabbing)
-	{
-		PhysicsHandle->ReleaseComponent();
-		bIsGrabbing = false;
-	}
+	// Release object and disable grabbing
+	PhysicsHandle->ReleaseComponent();
+	bIsGrabbing = false;
 }
 
-void ADefaultCharacter::StartSecondary()
+// Called to update the location of a grabbed object
+void ADefaultCharacter::MoveObject()
 {
-	// Set mouse location to the center of the screen
-	// This is done to allow for the most possible rotation in any direction, since the mouse stops at the edge of the screen
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
-	PC->SetMouseLocation(UKismetMathLibrary::FTrunc(ViewportSize.X / 2.0f), UKismetMathLibrary::FTrunc(ViewportSize.Y / 2.0f));
+	// Get location as a distance from the camera based on current rotation
+	FVector HoldDistance = Camera->GetComponentRotation().Vector() * HOLD_DISTANCE;
+	FVector Location = Camera->GetComponentLocation() + HoldDistance;
+
+	// Set location of object
+	PhysicsHandle->SetTargetLocation(Location);
+}
+
+// Called to start rotating an object
+void ADefaultCharacter::StartRotation()
+{
+	// Center mouse to allow for the most possible rotation in any direction, since the mouse stops at the edge of the screen
+	SetMouseCenter();
 
 	// Disable looking and enable rotating
 	bCanLook = false;
 	bIsRotating = true;
 }
 
-void ADefaultCharacter::StopSecondary()
+// Called to stop rotating an object
+void ADefaultCharacter::StopRotation()
 {
 	// Disable rotating and enable looking
 	bIsRotating = false;
 	bCanLook = true;
+}
+
+// Called to update the rotation of a grabbed object
+void ADefaultCharacter::RotateObject()
+{
+	// Get the current mouse position
+	float MouseX;
+	float MouseY;
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	PC->GetMousePosition(MouseX, MouseY);
+
+	// Set pitch and yaw according to the difference between current mouse position and viewport center
+	FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+	float Pitch = (MouseY - (ViewportSize.Y / 2.0f)) * ROTATION_SENSITIVITY;
+	float Yaw = (MouseX - (ViewportSize.X / 2.0f)) * ROTATION_SENSITIVITY;
+
+	// Set new rotation of object based on pitch and yaw
+	PhysicsHandle->SetTargetRotation(UKismetMathLibrary::MakeRotator(0.0f, Pitch, Yaw));
+}
+
+// ==================== Helpers ====================
+
+// Called to set the mouse location to the center of the screen
+void ADefaultCharacter::SetMouseCenter()
+{
+	// Get player controller and size of screen
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+
+	// Set mouse location
+	PC->SetMouseLocation(UKismetMathLibrary::FTrunc(ViewportSize.X / 2.0f), UKismetMathLibrary::FTrunc(ViewportSize.Y / 2.0f));
 }

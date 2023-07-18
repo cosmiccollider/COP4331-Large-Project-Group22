@@ -20,6 +20,8 @@ class PROJECT_API ADefaultCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+// ==================== Character ====================
+
 public:
 	// Sets default values for this character's properties
 	ADefaultCharacter();
@@ -34,21 +36,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		UCameraComponent* Camera;
 
-	// Physics Constraint
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UPhysicsConstraintComponent* PhysicsConstraint;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-	// Physics Handle
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UPhysicsHandleComponent* PhysicsHandle;
+// ==================== Input Actions ====================
 
-	// Pause Menu
-	UPROPERTY(VisibleAnywhere)
-		TSubclassOf<UPauseMenuUserWidget> PauseMenuClass;
-
-	UPROPERTY()
-		UPauseMenuUserWidget* PauseMenu;
-
+public:
 	// Default Mapping Context and Input Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputMappingContext* DefaultMappingContext;
@@ -74,30 +68,95 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* SecondaryAction;
 
-	// Class Variables
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bCanLook;
-	
+	// Pause Menu User Widget
+	UPROPERTY(VisibleAnywhere)
+		TSubclassOf<UPauseMenuUserWidget> PauseMenuClass;
+
+	UPROPERTY()
+		UPauseMenuUserWidget* PauseMenu;
+
+	// Input Variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bInPauseMenu;
 
+protected:
+	// Input Action functions
+	UFUNCTION()
+		void ToggleCrouch();
+
+	UFUNCTION()
+		void Look(const FInputActionValue& Value);
+
+	UFUNCTION()
+		void Move(const FInputActionValue& Value);
+
+	UFUNCTION()
+		void Pause();
+
+	UFUNCTION()
+		void StartPrimary();
+
+	UFUNCTION()
+		void StopPrimary();
+
+	UFUNCTION()
+		void StartSecondary();
+
+	UFUNCTION()
+		void StopSecondary();
+
+	// Input variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bCanLook;
+
+// ==================== Physics ====================
+
+public:
+	// Physics Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UPhysicsConstraintComponent* PhysicsConstraint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UPhysicsHandleComponent* PhysicsHandle;
+
+	// Gravity
+	UFUNCTION()
+		void EnableGravity();
+
+	UFUNCTION()
+		void DisableGravity();
+
+protected:
+	// Grab Object
+	UFUNCTION()
+		void StartGrab();
+
+	UFUNCTION()
+		void StopGrab();
+
+	UFUNCTION()
+		void MoveObject();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsGrabbing;
+
+	// Rotate Object
+	UFUNCTION()
+		void StartRotation();
+
+	UFUNCTION()
+		void StopRotation();
+
+	UFUNCTION()
+		void RotateObject();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsRotating;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+// ==================== Helpers ====================
 
-	// Input Action functions
-	void ToggleCrouch();
-	void Look(const FInputActionValue& Value);
-	void Move(const FInputActionValue& Value);
-	void Pause();
-	void StartPrimary();
-	void StopPrimary();
-	void StartSecondary();
-	void StopSecondary();
+protected:
+	// Set Mouse Center
+	UFUNCTION()
+		void SetMouseCenter();
 };

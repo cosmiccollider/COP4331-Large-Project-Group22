@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "SettingsMenuUserWidget.h"
-#include "MainMenuUserWidget.generated.h"
+#include "PauseMenuUserWidget.generated.h"
+
+class UButton;
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_API UMainMenuUserWidget : public USettingsMenuUserWidget
+class PROJECT_API UPauseMenuUserWidget : public USettingsMenuUserWidget
 {
 	GENERATED_BODY()
 	
@@ -18,17 +20,23 @@ protected:
 	// Overrides
 	virtual void NativeConstruct() override;
 
-	// Main Menu Functions
+	// Pause Menu Functions
 	UFUNCTION()
-		void Play();
-
+		void Resume();
+	
 	UFUNCTION()
-		void Quit();
+		void MainMenu();
+	
+	UFUNCTION()
+		void Desktop();
 
-	// Main Menu Buttons
+	// Pause Menu Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Play_Button;
+		UButton* Resume_Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Quit_Button;
+		UButton* Main_Menu_Button;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+		UButton* Desktop_Button;
 };

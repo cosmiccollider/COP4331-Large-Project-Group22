@@ -15,7 +15,6 @@ void UMainMenuUserWidget::NativeConstruct()
 	if (Quit_Button) Quit_Button->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Quit);
 }
 
-// Main Menu Functions
 void UMainMenuUserWidget::Play()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), "TestMap");

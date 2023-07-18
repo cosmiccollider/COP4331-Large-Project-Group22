@@ -6,6 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "SettingsMenuUserWidget.generated.h"
 
+class UButton;
+class UCheckBox;
+class UWidgetSwitcher;
+
 /**
  * 
  */
@@ -65,44 +69,45 @@ protected:
 
 	// Widget Switcher
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
-		class UWidgetSwitcher* Widget_Switcher;
+		UWidgetSwitcher* Widget_Switcher;
 
 	// Settings Button
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Settings_Button;
+		UButton* Settings_Button;
 
 	// Back Button
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Back_Button;
+		UButton* Back_Button;
 
 	// Window Mode Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Window_Mode_Windowed_Button;
+		UButton* Window_Mode_Windowed_Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Window_Mode_Fullscreen_Button;
+		UButton* Window_Mode_Fullscreen_Button;
 
 	// Resolution Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Resolution_1280x720_Button;
+		UButton* Resolution_1280x720_Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Resolution_1920x1080_Button;
+		UButton* Resolution_1920x1080_Button;
 
 	// Quality Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Quality_Low_Button;
+		UButton* Quality_Low_Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Quality_Medium_Button;
+		UButton* Quality_Medium_Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UButton* Quality_High_Button;
+		UButton* Quality_High_Button;
 
 	// FPS Check Box
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		class UCheckBox* FPS_Check_Box;
+		UCheckBox* FPS_Check_Box;
 
+	// FPS User Widget
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UUserWidget> FPSClass;
 

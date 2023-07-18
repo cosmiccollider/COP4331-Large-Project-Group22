@@ -2,9 +2,9 @@
 
 
 #include "DefaultGameModeBase.h"
-#include "DefaultCharacter.h"
-#include "DefaultHUD.h"
-#include "UObject/ConstructorHelpers.h"
+#include "Actors/DefaultCharacter.h"
+#include "UI/DefaultHUD.h"
+//#include "UObject/ConstructorHelpers.h"
 
 ADefaultGameModeBase::ADefaultGameModeBase()
 {

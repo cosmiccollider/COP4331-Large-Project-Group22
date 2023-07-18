@@ -3,7 +3,7 @@
 
 #include "PauseMenuUserWidget.h"
 #include "Components/Button.h"
-#include "DefaultCharacter.h"
+#include "Actors/DefaultCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
