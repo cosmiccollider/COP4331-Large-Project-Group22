@@ -16,8 +16,5 @@ class PROJECT_API APhysicsStaticMeshActor : public AStaticMeshActor
 	
 public:
 	UFUNCTION()
-		void EnableGravity();
-
-	UFUNCTION()
-		void DisableGravity();
+	void SetGravity(bool bEnabled);
 };

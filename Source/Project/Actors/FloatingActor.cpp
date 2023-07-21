@@ -21,12 +21,6 @@ AFloatingActor::AFloatingActor()
 	}
 }
 
-// Called when the game starts or when spawned
-void AFloatingActor::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 // Called every frame
 void AFloatingActor::Tick(float DeltaTime)
 {
@@ -40,4 +34,10 @@ void AFloatingActor::Tick(float DeltaTime)
 	float DeltaRotation = DeltaTime * RotationSpeed; // Rotate by number of degrees equal to RotationSpeed each second
 	NewRotation.Yaw += DeltaRotation;
 	SetActorLocationAndRotation(NewLocation, NewRotation);
+}
+
+// Called when the game starts or when spawned
+void AFloatingActor::BeginPlay()
+{
+	Super::BeginPlay();
 }

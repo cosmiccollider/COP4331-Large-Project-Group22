@@ -5,23 +5,25 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "UI/PauseMenuUserWidget.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "UI/OverlayUserWidget.h"
+#include "UI/PauseMenuUserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
-#define HOLD_DISTANCE 200;
-#define ROTATION_SENSITIVITY 0.5f;
-#define TRACE_DISTANCE 400;
+#define HOLD_DISTANCE 200
+#define MAIN_MENU_MAP "MainMenuMap"
+#define ROTATION_SENSITIVITY 0.5f
+#define TRACE_DISTANCE 400
 
 // ==================== Character ====================
 
@@ -48,28 +50,52 @@ ADefaultCharacter::ADefaultCharacter()
 
 	// Set Default Mapping Context and Input Action default assets
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultMappingContextFinder(TEXT("/Game/Input/IMC_Default.IMC_Default"));
-	if (DefaultMappingContextFinder.Succeeded()) DefaultMappingContext = DefaultMappingContextFinder.Object;
+	if (DefaultMappingContextFinder.Succeeded())
+	{
+		DefaultMappingContext = DefaultMappingContextFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> CrouchActionFinder(TEXT("/Game/Input/Actions/IA_Crouch.IA_Crouch"));
-	if (CrouchActionFinder.Succeeded()) CrouchAction = CrouchActionFinder.Object;
+	if (CrouchActionFinder.Succeeded())
+	{
+		CrouchAction = CrouchActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionFinder(TEXT("/Game/Input/Actions/IA_Jump.IA_Jump"));
-	if (JumpActionFinder.Succeeded()) JumpAction = JumpActionFinder.Object;
+	if (JumpActionFinder.Succeeded())
+	{
+		JumpAction = JumpActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionFinder(TEXT("/Game/Input/Actions/IA_Look.IA_Look"));
-	if (LookActionFinder.Succeeded()) LookAction = LookActionFinder.Object;
+	if (LookActionFinder.Succeeded())
+	{
+		LookAction = LookActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Game/Input/Actions/IA_Move.IA_Move"));
-	if (MoveActionFinder.Succeeded()) MoveAction = MoveActionFinder.Object;
+	if (MoveActionFinder.Succeeded())
+	{
+		MoveAction = MoveActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> PauseActionFinder(TEXT("/Game/Input/Actions/IA_Pause.IA_Pause"));
-	if (PauseActionFinder.Succeeded()) PauseAction = PauseActionFinder.Object;
+	if (PauseActionFinder.Succeeded())
+	{
+		PauseAction = PauseActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> PrimaryActionFinder(TEXT("/Game/Input/Actions/IA_Primary.IA_Primary"));
-	if (PrimaryActionFinder.Succeeded()) PrimaryAction = PrimaryActionFinder.Object;
+	if (PrimaryActionFinder.Succeeded())
+	{
+		PrimaryAction = PrimaryActionFinder.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> SecondaryActionFinder(TEXT("/Game/Input/Actions/IA_Secondary.IA_Secondary"));
-	if (SecondaryActionFinder.Succeeded()) SecondaryAction = SecondaryActionFinder.Object;
+	if (SecondaryActionFinder.Succeeded())
+	{
+		SecondaryAction = SecondaryActionFinder.Object;
+	}
 
 	// Set class variables
 	bCanLook = true;
@@ -77,9 +103,19 @@ ADefaultCharacter::ADefaultCharacter()
 	bIsGrabbing = false;
 	bIsRotating = false;
 
+	// Set Overlay Widget class
+	static ConstructorHelpers::FClassFinder<UOverlayUserWidget> OverlayFinder(TEXT("/Game/UI/WBP_Overlay.WBP_Overlay_C"));
+	if (OverlayFinder.Succeeded())
+	{
+		OverlayClass = OverlayFinder.Class;
+	}
+
 	// Set Pause Menu Widget class
 	static ConstructorHelpers::FClassFinder<UPauseMenuUserWidget> PauseMenuFinder(TEXT("/Game/UI/WBP_PauseMenu.WBP_PauseMenu_C"));
-	if (PauseMenuFinder.Succeeded()) PauseMenuClass = PauseMenuFinder.Class;
+	if (PauseMenuFinder.Succeeded())
+	{
+		PauseMenuClass = PauseMenuFinder.Class;
+	}
 }
 
 // Called every frame
@@ -90,7 +126,11 @@ void ADefaultCharacter::Tick(float DeltaTime)
 	if (bIsGrabbing)
 	{
 		MoveObject();
-		if (bIsRotating) RotateObject();
+
+		if (bIsRotating)
+		{
+			RotateObject();
+		}
 	}
 }
 
@@ -132,15 +172,34 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		// Add Input Mapping Context
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+
+		// Add Overlay
+		if (OverlayClass)
+		{
+			Overlay = CreateWidget<UOverlayUserWidget>(PC, OverlayClass);
+			Overlay->AddToViewport();
+
+			// Only add the reticle if we are not in the main menu
+			if (UGameplayStatics::GetCurrentLevelName(GetWorld()) != MAIN_MENU_MAP)
+			{
+				Overlay->ShowReticle(true);
+			}
+		}
 	}
+}
+
+// Get Overlay User Widget
+UOverlayUserWidget* ADefaultCharacter::GetOverlay()
+{
+	return Overlay;
 }
 
 // ==================== Input Actions ====================
@@ -236,31 +295,42 @@ void ADefaultCharacter::StartPrimary()
 // Called to stop primary mouse input
 void ADefaultCharacter::StopPrimary()
 {
-	if (bIsGrabbing) StopGrab();
+	if (bIsGrabbing)
+	{
+		StopGrab();
+	}
 }
 
 // Called to start secondary mouse input
 void ADefaultCharacter::StartSecondary()
 {
-	if (bIsGrabbing) StartRotation();
+	if (bIsGrabbing)
+	{
+		StartRotation();
+	}
 }
 
 // Called to stop secondary mouse input
 void ADefaultCharacter::StopSecondary()
 {
-	if (bIsRotating) StopRotation();
+	if (bIsRotating)
+	{
+		StopRotation();
+	}
 }
 
 // ==================== Physics ====================
 
-void ADefaultCharacter::EnableGravity()
+void ADefaultCharacter::SetGravity(bool bEnabled)
 {
-	GetCharacterMovement()->GravityScale = 1;
-}
-
-void ADefaultCharacter::DisableGravity()
-{
-	GetCharacterMovement()->GravityScale = 0;
+	if (bEnabled)
+	{
+		GetCharacterMovement()->GravityScale = 1;
+	}
+	else
+	{
+		GetCharacterMovement()->GravityScale = 0;
+	}
 }
 
 // Called to start grabbing an object

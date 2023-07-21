@@ -23,10 +23,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		APhysicsStaticMeshActor* TestCube;
+	APhysicsStaticMeshActor* TestCube;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		APhysicsStaticMeshActor* TestBox;
+	APhysicsStaticMeshActor* TestBox;
 
 protected:
 	// Called when the game starts or when spawned

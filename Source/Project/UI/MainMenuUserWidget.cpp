@@ -11,8 +11,15 @@ void UMainMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (Play_Button) Play_Button->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Play);
-	if (Quit_Button) Quit_Button->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Quit);
+	if (PlayButton)
+	{
+		PlayButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Play);
+	}
+
+	if (QuitButton)
+	{
+		QuitButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Quit);
+	}
 }
 
 void UMainMenuUserWidget::Play()

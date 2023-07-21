@@ -22,10 +22,10 @@ public:
 
 	// Main Menu User Widget
 	UPROPERTY(VisibleAnywhere)
-		TSubclassOf<UMainMenuUserWidget> MainMenuClass;
+	TSubclassOf<UMainMenuUserWidget> MainMenuClass;
 
 	UPROPERTY()
-		UMainMenuUserWidget* MainMenu;
+	UMainMenuUserWidget* MainMenu;
 
 protected:
 	// Called when the game starts or when spawned

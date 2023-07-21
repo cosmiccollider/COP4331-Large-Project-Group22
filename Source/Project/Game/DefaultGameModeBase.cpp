@@ -3,7 +3,6 @@
 
 #include "DefaultGameModeBase.h"
 #include "Actors/DefaultCharacter.h"
-#include "UI/DefaultHUD.h"
 //#include "UObject/ConstructorHelpers.h"
 
 ADefaultGameModeBase::ADefaultGameModeBase()
@@ -12,5 +11,4 @@ ADefaultGameModeBase::ADefaultGameModeBase()
 	if (DefaultCharacterFinder.Succeeded()) DefaultPawnClass = DefaultCharacterFinder.Class;*/
 
 	DefaultPawnClass = ADefaultCharacter::StaticClass();
-	HUDClass = ADefaultHUD::StaticClass();
 }

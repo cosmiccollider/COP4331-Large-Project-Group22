@@ -22,15 +22,15 @@ protected:
 
 	// Main Menu Functions
 	UFUNCTION()
-		void Play();
+	void Play();
 
 	UFUNCTION()
-		void Quit();
+	void Quit();
 
 	// Main Menu Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Play_Button;
+	UButton* PlayButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Quit_Button;
+	UButton* QuitButton;
 };

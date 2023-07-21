@@ -22,21 +22,27 @@ protected:
 
 	// Pause Menu Functions
 	UFUNCTION()
-		void Resume();
+	void Resume();
+
+	UFUNCTION()
+	void Restart();
 	
 	UFUNCTION()
-		void MainMenu();
+	void MainMenu();
 	
 	UFUNCTION()
-		void Desktop();
+	void Desktop();
 
 	// Pause Menu Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Resume_Button;
+	UButton* ResumeButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Main_Menu_Button;
+	UButton* RestartButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Desktop_Button;
+	UButton* MainMenuButton;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UButton* DesktopButton;
 };

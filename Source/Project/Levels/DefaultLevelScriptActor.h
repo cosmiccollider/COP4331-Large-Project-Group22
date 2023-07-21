@@ -20,23 +20,20 @@ class PROJECT_API ADefaultLevelScriptActor : public ALevelScriptActor
 public:
 	ADefaultLevelScriptActor();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	// Called to determine if an object is inside a container
 	UFUNCTION()
-		bool IsObjectInContainer(APhysicsStaticMeshActor* Object, APhysicsStaticMeshActor* Container);
+	bool IsObjectInContainer(APhysicsStaticMeshActor* Object, APhysicsStaticMeshActor* Container);
 
+	// Called to set gravity for all physics actors in the level
 	UFUNCTION()
-		void EnableGravity();
+	void SetGravity(bool bEnabled);
 
-	UFUNCTION()
-		void DisableGravity();
+	// Actor arrays
+	UPROPERTY()
+	TArray<AActor*> ActorArray;
 
 	UPROPERTY()
-		TArray<AActor*> ActorArray;
-
-	UPROPERTY()
-		TArray<APhysicsStaticMeshActor*> PhysicsActorArray;
+	TArray<APhysicsStaticMeshActor*> PhysicsActorArray;
 
 protected:
 	// Called when the game starts or when spawned

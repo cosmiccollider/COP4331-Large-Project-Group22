@@ -2,45 +2,114 @@
 
 
 #include "SettingsMenuUserWidget.h"
+#include "Actors/DefaultCharacter.h"
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
+#include "Components/EditableTextBox.h"
+#include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Types/SlateEnums.h"
+#include "UI/OverlayUserWidget.h"
 
-USettingsMenuUserWidget::USettingsMenuUserWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
-{
-	static ConstructorHelpers::FClassFinder<UUserWidget> FPSFinder(TEXT("/Game/UI/WBP_FPS.WBP_FPS_C"));
-	if (FPSFinder.Succeeded()) FPSClass = FPSFinder.Class;
-}
+#define LOCTEXT_NAMESPACE "FPS"
 
 // Override Native Construct
 void USettingsMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (Settings_Button) Settings_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Settings);
-	if (Back_Button) Back_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Back);
-	if (Window_Mode_Windowed_Button) Window_Mode_Windowed_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetWindowed);
-	if (Window_Mode_Fullscreen_Button) Window_Mode_Fullscreen_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetFullscreen);
-	if (Resolution_1280x720_Button) Resolution_1280x720_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1280x720);
-	if (Resolution_1920x1080_Button) Resolution_1920x1080_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1920x1080);
-	if (Quality_Low_Button) Quality_Low_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityLow);
-	if (Quality_Medium_Button) Quality_Medium_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityMedium);
-	if (Quality_High_Button) Quality_High_Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityHigh);
-	if (FPS_Check_Box) FPS_Check_Box->OnCheckStateChanged.AddDynamic(this, &USettingsMenuUserWidget::ShowFPS);
+	// Set Buttons
+	if (SettingsButton)
+	{
+		SettingsButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Settings);
+	}
+
+	if (BackButton)
+	{
+		BackButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Back);
+	}
+
+	if (WindowModeWindowedButton)
+	{
+		WindowModeWindowedButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetWindowed);
+	}
+
+	if (WindowModeFullscreenButton)
+	{
+		WindowModeFullscreenButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetFullscreen);
+	}
+
+	if (Resolution1280x720Button)
+	{
+		Resolution1280x720Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1280x720);
+	}
+
+	if (Resolution1920x1080Button)
+	{
+		Resolution1920x1080Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1920x1080);
+	}
+
+	if (QualityLowButton)
+	{
+		QualityLowButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityLow);
+	}
+
+	if (QualityMediumButton)
+	{
+		QualityMediumButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityMedium);
+	}
+
+	if (QualityHighButton)
+	{
+		QualityHighButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityHigh);
+	}
+
+	if (FPSCheckBox)
+	{
+		FPSCheckBox->OnCheckStateChanged.AddDynamic(this, &USettingsMenuUserWidget::ShowFPS);
+	}
+
+	if (MaxFPSTextBox)
+	{
+		MaxFPSTextBox->OnTextChanged.AddDynamic(this, &USettingsMenuUserWidget::CheckMaxFPS);
+	}
+
+	if (MaxFPSTextBox)
+	{
+		MaxFPSTextBox->OnTextCommitted.AddDynamic(this, &USettingsMenuUserWidget::SetMaxFPS);
+	}
+
+	// Check that the player character and overlay exist
+	// Then check if FPSCheckBox should already be checked upon construction
+	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		if (UOverlayUserWidget* Overlay = PC->GetOverlay())
+		{
+			if (Overlay->FPSText->GetVisibility() == ESlateVisibility::Visible)
+			{
+				FPSCheckBox->SetCheckedState(ECheckBoxState::Checked);
+			}
+		}
+	}
+
+	// Set the Max FPS text box based on the current max fps from the console
+	IConsoleVariable* Console = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"));
+	MaxFPSTextBox->SetText(FText::Format(LOCTEXT("FPS", "{FPS}"), Console->GetInt()));
 }
 
 // Settings Function
 void USettingsMenuUserWidget::Settings()
 {
-	Widget_Switcher->SetActiveWidgetIndex(1);
+	WidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
 // Back Function
 void USettingsMenuUserWidget::Back()
 {
-	Widget_Switcher->SetActiveWidgetIndex(0);
+	WidgetSwitcher->SetActiveWidgetIndex(0);
 }
 
 // Window Mode Functions
@@ -101,17 +170,37 @@ void USettingsMenuUserWidget::SetQualityHigh()
 	SetQuality(2);
 }
 
-// Show FPS Function
+// FPS Functions
 void USettingsMenuUserWidget::ShowFPS(bool bIsChecked)
 {
-	if (bIsChecked && FPSClass)
+	ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	if (bIsChecked)
 	{
-		FPS = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), FPSClass);
-		FPS->AddToViewport();
+		PC->GetOverlay()->ShowFPS(true);
 	}
-	else if (FPS)
+	else
 	{
-		FPS->RemoveFromParent();
-		FPS = nullptr;
+		PC->GetOverlay()->ShowFPS(false);
+	}
+}
+
+void USettingsMenuUserWidget::CheckMaxFPS(const FText& Text)
+{
+	// If the most recent character entered was not a number, chop it off the text field
+	if (!Text.IsNumeric())
+	{
+		MaxFPSTextBox->SetText(FText::FromString(Text.ToString().LeftChop(1)));
+	}
+}
+
+void USettingsMenuUserWidget::SetMaxFPS(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		// Get the current value in the text field and set it through the console
+		int32 FPS = FCString::Atoi(*Text.ToString());
+		IConsoleVariable* Console = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"));
+		Console->Set(FPS);
 	}
 }

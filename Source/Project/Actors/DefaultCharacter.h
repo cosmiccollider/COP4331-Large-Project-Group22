@@ -11,6 +11,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputComponent;
 class UInputMappingContext;
+class UOverlayUserWidget;
 class UPauseMenuUserWidget;
 class UPhysicsConstraintComponent;
 class UPhysicsHandleComponent;
@@ -34,7 +35,17 @@ public:
 
 	// First Person Camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		UCameraComponent* Camera;
+	UCameraComponent* Camera;
+
+	// Overlay User Widget
+	UFUNCTION()
+	UOverlayUserWidget* GetOverlay();
+
+	UPROPERTY(VisibleAnywhere)
+	TSubclassOf<UOverlayUserWidget> OverlayClass;
+
+	UPROPERTY()
+	UOverlayUserWidget* Overlay;
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,118 +56,115 @@ protected:
 public:
 	// Default Mapping Context and Input Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputMappingContext* DefaultMappingContext;
+	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* CrouchAction;
+	UInputAction* CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* JumpAction;
+	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* LookAction;
+	UInputAction* LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* MoveAction;
+	UInputAction* MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* PauseAction;
+	UInputAction* PauseAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* PrimaryAction;
+	UInputAction* PrimaryAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* SecondaryAction;
+	UInputAction* SecondaryAction;
 
 	// Pause Menu User Widget
 	UPROPERTY(VisibleAnywhere)
-		TSubclassOf<UPauseMenuUserWidget> PauseMenuClass;
+	TSubclassOf<UPauseMenuUserWidget> PauseMenuClass;
 
 	UPROPERTY()
-		UPauseMenuUserWidget* PauseMenu;
+	UPauseMenuUserWidget* PauseMenu;
 
 	// Input Variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bInPauseMenu;
+	bool bInPauseMenu;
 
 protected:
 	// Input Action functions
 	UFUNCTION()
-		void ToggleCrouch();
+	void ToggleCrouch();
 
 	UFUNCTION()
-		void Look(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
 
 	UFUNCTION()
-		void Move(const FInputActionValue& Value);
+	void Move(const FInputActionValue& Value);
 
 	UFUNCTION()
-		void Pause();
+	void Pause();
 
 	UFUNCTION()
-		void StartPrimary();
+	void StartPrimary();
 
 	UFUNCTION()
-		void StopPrimary();
+	void StopPrimary();
 
 	UFUNCTION()
-		void StartSecondary();
+	void StartSecondary();
 
 	UFUNCTION()
-		void StopSecondary();
+	void StopSecondary();
 
 	// Input variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bCanLook;
+	bool bCanLook;
 
 // ==================== Physics ====================
 
 public:
 	// Physics Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UPhysicsConstraintComponent* PhysicsConstraint;
+	UPhysicsConstraintComponent* PhysicsConstraint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UPhysicsHandleComponent* PhysicsHandle;
+	UPhysicsHandleComponent* PhysicsHandle;
 
 	// Gravity
 	UFUNCTION()
-		void EnableGravity();
-
-	UFUNCTION()
-		void DisableGravity();
+	void SetGravity(bool bEnabled);
 
 protected:
 	// Grab Object
 	UFUNCTION()
-		void StartGrab();
+	void StartGrab();
 
 	UFUNCTION()
-		void StopGrab();
+	void StopGrab();
 
 	UFUNCTION()
-		void MoveObject();
+	void MoveObject();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bIsGrabbing;
+	bool bIsGrabbing;
 
 	// Rotate Object
 	UFUNCTION()
-		void StartRotation();
+	void StartRotation();
 
 	UFUNCTION()
-		void StopRotation();
+	void StopRotation();
 
 	UFUNCTION()
-		void RotateObject();
+	void RotateObject();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bIsRotating;
+	bool bIsRotating;
 
 // ==================== Helpers ====================
 
 protected:
 	// Set Mouse Center
 	UFUNCTION()
-		void SetMouseCenter();
+	void SetMouseCenter();
 };

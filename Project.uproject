@@ -9,8 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
+				"UMG",
+				"Engine"
 			]
 		}
 	],
@@ -24,8 +24,7 @@
 		}
 	],
 	"TargetPlatforms": [
-		"Windows",
 		"Mac",
-		"HoloLens"
+		"Windows"
 	]
 }

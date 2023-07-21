@@ -3,12 +3,7 @@
 
 #include "Actors/PhysicsStaticMeshActor.h"
 
-void APhysicsStaticMeshActor::EnableGravity()
+void APhysicsStaticMeshActor::SetGravity(bool bEnabled)
 {
-	GetStaticMeshComponent()->SetEnableGravity(true);
-}
-
-void APhysicsStaticMeshActor::DisableGravity()
-{
-	GetStaticMeshComponent()->SetEnableGravity(false);
+	GetStaticMeshComponent()->SetEnableGravity(bEnabled);
 }

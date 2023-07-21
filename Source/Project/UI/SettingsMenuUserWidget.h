@@ -8,6 +8,7 @@
 
 class UButton;
 class UCheckBox;
+class UEditableTextBox;
 class UWidgetSwitcher;
 
 /**
@@ -18,99 +19,99 @@ class PROJECT_API USettingsMenuUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-public:
-	USettingsMenuUserWidget(const FObjectInitializer& ObjectInitializer);
-
 protected:
 	// Overrides
 	virtual void NativeConstruct() override;
 	
 	// Settings Function
 	UFUNCTION()
-		void Settings();
+	void Settings();
 	
 	// Back Function
 	UFUNCTION()
-		void Back();
+	void Back();
 
 	// Window Mode Functions
 	UFUNCTION()
-		void SetWindowed();
+	void SetWindowed();
 
 	UFUNCTION()
-		void SetFullscreen();
+	void SetFullscreen();
 
 	// Resolution Functions
 	UFUNCTION()
-		void SetResolution(FIntPoint Resolution);
+	void SetResolution(FIntPoint Resolution);
 	
 	UFUNCTION()
-		void SetResolution1280x720();
+	void SetResolution1280x720();
 
 	UFUNCTION()
-		void SetResolution1920x1080();
+	void SetResolution1920x1080();
 
 	// Quality Fuctions
 	UFUNCTION()
-		void SetQuality(int32 Value);
+	void SetQuality(int32 Value);
 
 	UFUNCTION()
-		void SetQualityLow();
+	void SetQualityLow();
 
 	UFUNCTION()
-		void SetQualityMedium();
+	void SetQualityMedium();
 
 	UFUNCTION()
-		void SetQualityHigh();
+	void SetQualityHigh();
 	
-	// Show FPS Function
+	// FPS Functions
 	UFUNCTION()
-		void ShowFPS(bool bIsChecked);
+	void ShowFPS(bool bIsChecked);
+
+	UFUNCTION()
+	void CheckMaxFPS(const FText& Text);
+
+	UFUNCTION()
+	void SetMaxFPS(const FText& Text, ETextCommit::Type CommitMethod);
 
 	// Widget Switcher
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
-		UWidgetSwitcher* Widget_Switcher;
+	UWidgetSwitcher* WidgetSwitcher;
 
 	// Settings Button
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Settings_Button;
+	UButton* SettingsButton;
 
 	// Back Button
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Back_Button;
+	UButton* BackButton;
 
 	// Window Mode Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Window_Mode_Windowed_Button;
+	UButton* WindowModeWindowedButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Window_Mode_Fullscreen_Button;
+	UButton* WindowModeFullscreenButton;
 
 	// Resolution Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Resolution_1280x720_Button;
+	UButton* Resolution1280x720Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Resolution_1920x1080_Button;
+	UButton* Resolution1920x1080Button;
 
 	// Quality Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Quality_Low_Button;
+	UButton* QualityLowButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Quality_Medium_Button;
+	UButton* QualityMediumButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UButton* Quality_High_Button;
+	UButton* QualityHighButton;
 
 	// FPS Check Box
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-		UCheckBox* FPS_Check_Box;
+	UCheckBox* FPSCheckBox;
 
-	// FPS User Widget
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<UUserWidget> FPSClass;
-
-	UPROPERTY()
-		UUserWidget* FPS;
+	// Max FPS Text Box
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UEditableTextBox* MaxFPSTextBox;
 };

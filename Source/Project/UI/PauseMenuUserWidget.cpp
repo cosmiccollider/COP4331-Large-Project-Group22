@@ -7,14 +7,32 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#define MAIN_MENU_MAP "MainMenuMap"
+
 // Override Native Construct
 void UPauseMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (Resume_Button) Resume_Button->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Resume);
-	if (Main_Menu_Button) Main_Menu_Button->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::MainMenu);
-	if (Desktop_Button) Desktop_Button->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Desktop);
+	if (ResumeButton)
+	{
+		ResumeButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Resume);
+	}
+
+	if (RestartButton)
+	{
+		RestartButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Restart);
+	}
+
+	if (MainMenuButton)
+	{
+		MainMenuButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::MainMenu);
+	}
+
+	if (DesktopButton)
+	{
+		DesktopButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Desktop);
+	}
 }
 
 void UPauseMenuUserWidget::Resume()
@@ -36,9 +54,15 @@ void UPauseMenuUserWidget::Resume()
 	PCharacter->bInPauseMenu = false;
 }
 
+void UPauseMenuUserWidget::Restart()
+{
+	Resume();
+	UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
+}
+
 void UPauseMenuUserWidget::MainMenu()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap");
+	UGameplayStatics::OpenLevel(GetWorld(), MAIN_MENU_MAP);
 }
 
 void UPauseMenuUserWidget::Desktop()
