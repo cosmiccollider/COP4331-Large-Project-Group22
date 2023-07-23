@@ -7,10 +7,12 @@
 #include "DefaultLevelScriptActor.generated.h"
 
 class AActor;
-class APhysicsStaticMeshActor;
+class AButtonActor;
+class AFloatingActor;
+class ASimulatedActor;
 
 /**
- * 
+ * DefaultLevelScriptActor provides a base class derived from LevelScriptActor which we can make specific level scripts from.
  */
 UCLASS()
 class PROJECT_API ADefaultLevelScriptActor : public ALevelScriptActor
@@ -20,22 +22,40 @@ class PROJECT_API ADefaultLevelScriptActor : public ALevelScriptActor
 public:
 	ADefaultLevelScriptActor();
 
-	// Called to determine if an object is inside a container
-	UFUNCTION()
-	bool IsObjectInContainer(APhysicsStaticMeshActor* Object, APhysicsStaticMeshActor* Container);
-
-	// Called to set gravity for all physics actors in the level
-	UFUNCTION()
-	void SetGravity(bool bEnabled);
-
-	// Actor arrays
+	/** Array of all Actors in the level */
 	UPROPERTY()
 	TArray<AActor*> ActorArray;
 
+	/** Array of all ButtonActors in the level */
 	UPROPERTY()
-	TArray<APhysicsStaticMeshActor*> PhysicsActorArray;
+	TArray<AButtonActor*> ButtonActorArray;
+
+	/** Array of all FloatingActors in the level */
+	UPROPERTY()
+	TArray<AFloatingActor*> FloatingActorArray;
+
+	/** Array of all SimulatedActors in the level */
+	UPROPERTY()
+	TArray<ASimulatedActor*> SimulatedActorArray;
+
+	/**
+	 * Called to determine whether an object is inside of a container
+	 * 
+	 * @param	Object			specifies the object which goes inside the container
+	 * @param	Container		specifies the contianer which holds the object
+	 */
+	UFUNCTION()
+	bool IsObjectInContainer(ASimulatedActor* Object, ASimulatedActor* Container);
+
+	/**
+	 * Called to set whether or not the player character and all SimulatedActors in the level are affected by gravity
+	 *
+	 * @param	bEnabled	specify true to enable gravity
+	 */
+	UFUNCTION()
+	void SetGravity(const bool bEnabled);
 
 protected:
-	// Called when the game starts or when spawned
+	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 };

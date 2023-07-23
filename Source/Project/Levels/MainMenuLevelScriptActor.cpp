@@ -2,16 +2,14 @@
 
 
 #include "MainMenuLevelScriptActor.h"
-#include "Actors/DefaultCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuUserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
-// Sets default values
 AMainMenuLevelScriptActor::AMainMenuLevelScriptActor()
 {
-	// Set Main Menu Widget class
+	// Set MainMenuClass to MainMenuWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<UMainMenuUserWidget> MainMenuFinder(TEXT("/Game/UI/WBP_MainMenu.WBP_MainMenu_C"));
 	if (MainMenuFinder.Succeeded())
 	{
@@ -19,12 +17,11 @@ AMainMenuLevelScriptActor::AMainMenuLevelScriptActor()
 	}
 }
 
-// Called when the game starts or when spawned
 void AMainMenuLevelScriptActor::BeginPlay()
 {
 	APlayerController* PController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	// Create Main Menu widget and add it to the screen
+	// Create Main Menu and add it to the screen
 	if (MainMenuClass)
 	{
 		MainMenu = CreateWidget<UMainMenuUserWidget>(PController, MainMenuClass);

@@ -2,12 +2,13 @@
 
 
 #include "Levels/DefaultLevelScriptActor.h"
+#include "Actors/ButtonActor.h"
+#include "Actors/DefaultActor.h"
 #include "Actors/DefaultCharacter.h"
-#include "Actors/PhysicsStaticMeshActor.h"
-#include "Engine/StaticMesh.h"
+#include "Actors/FloatingActor.h"
+#include "Actors/SimulatedActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "UI/OverlayUserWidget.h"
 
 ADefaultLevelScriptActor::ADefaultLevelScriptActor()
 {
@@ -18,18 +19,28 @@ void ADefaultLevelScriptActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Get all physics actors in the level and add them to their own array
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APhysicsStaticMeshActor::StaticClass(), ActorArray);
+	// Get all actors in the level and store them in an array
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADefaultActor::StaticClass(), ActorArray);
 
-	// Cast all Actors to array of PhysicsActors so we can access functions of that class
+	// Cast all Actors to their respective class arrays
 	for (AActor* Actor : ActorArray)
 	{
-		PhysicsActorArray.Add(Cast<APhysicsStaticMeshActor>(Actor));
+		if (AButtonActor* ButtonActor = Cast<AButtonActor>(Actor))
+		{
+			ButtonActorArray.Add(ButtonActor);
+		}
+		else if (AFloatingActor* FloatingActor = Cast<AFloatingActor>(Actor))
+		{
+			FloatingActorArray.Add(FloatingActor);
+		}
+		else if (ASimulatedActor* SimulatedActor = Cast<ASimulatedActor>(Actor))
+		{
+			SimulatedActorArray.Add(SimulatedActor);
+		}
 	}
 }
 
-// Called to determine if an object is inside a container
-bool ADefaultLevelScriptActor::IsObjectInContainer(APhysicsStaticMeshActor* Object, APhysicsStaticMeshActor* Container)
+bool ADefaultLevelScriptActor::IsObjectInContainer(ASimulatedActor* Object, ASimulatedActor* Container)
 {
 	FVector ObjectOrigin = Object->GetActorLocation();
 
@@ -40,15 +51,14 @@ bool ADefaultLevelScriptActor::IsObjectInContainer(APhysicsStaticMeshActor* Obje
 	return UKismetMathLibrary::IsPointInBox(ObjectOrigin, ContainerOrigin, ContainerBoxExtent);
 }
 
-// Called to set gravity for all physics actors in the level
-void ADefaultLevelScriptActor::SetGravity(bool bEnabled)
+void ADefaultLevelScriptActor::SetGravity(const bool bEnabled)
 {
 	// Set gravity for player
 	ADefaultCharacter* Player = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	Player->SetGravity(bEnabled);
 
 	// Set gravity for objects
-	for (APhysicsStaticMeshActor* PhysicsActor : PhysicsActorArray) {
-		PhysicsActor->SetGravity(bEnabled);
+	for (ASimulatedActor* SimulatedActor : SimulatedActorArray) {
+		SimulatedActor->SetGravity(bEnabled);
 	}
 }

@@ -9,26 +9,29 @@
 
 #define MAIN_MENU_MAP "MainMenuMap"
 
-// Override Native Construct
 void UPauseMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Bind ResumeButton to Resume() function
 	if (ResumeButton)
 	{
 		ResumeButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Resume);
 	}
 
+	// Bind RestartButton to Restart() function
 	if (RestartButton)
 	{
 		RestartButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Restart);
 	}
 
+	// Bind MainMenuButton to MainMenu() function
 	if (MainMenuButton)
 	{
 		MainMenuButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::MainMenu);
 	}
 
+	// Bind DesktopButton to Desktop() function
 	if (DesktopButton)
 	{
 		DesktopButton->OnClicked.AddDynamic(this, &UPauseMenuUserWidget::Desktop);

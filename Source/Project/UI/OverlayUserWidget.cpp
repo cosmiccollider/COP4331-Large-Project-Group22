@@ -7,23 +7,22 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 #define LOCTEXT_NAMESPACE "FPS"
 
-// Override Native Construct
 void UOverlayUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Disable all overlay elements by default
 	ShowFPS(false);
 	ShowNarrative(false);
 	ShowReticle(false);
 }
 
-// FPS
-void UOverlayUserWidget::ShowFPS(bool bVisible)
+void UOverlayUserWidget::ShowFPS(const bool bVisible)
 {
+	// FPSTimer handles the interval at which the FPSText will be updated
 	FTimerHandle FPSTimer;
 
 	if (FPSText && bVisible)
@@ -40,12 +39,14 @@ void UOverlayUserWidget::ShowFPS(bool bVisible)
 
 void UOverlayUserWidget::SetFPSText()
 {
-	float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
-	FPSText->SetText(FText::Format(LOCTEXT("FPS", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
+	if (FPSText)
+	{
+		float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
+		FPSText->SetText(FText::Format(LOCTEXT("FPS", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
+	}
 }
 
-// Narrative
-void UOverlayUserWidget::ShowNarrative(bool bVisible)
+void UOverlayUserWidget::ShowNarrative(const bool bVisible)
 {
 	if (NarrativeBorder && NarrativeText && bVisible)
 	{
@@ -59,13 +60,15 @@ void UOverlayUserWidget::ShowNarrative(bool bVisible)
 	}
 }
 
-void UOverlayUserWidget::SetNarrativeText(FText Text)
+void UOverlayUserWidget::SetNarrativeText(const FText Text)
 {
-	NarrativeText->SetText(Text);
+	if (NarrativeText)
+	{
+		NarrativeText->SetText(Text);
+	}
 }
 
-// Reticle
-void UOverlayUserWidget::ShowReticle(bool bVisible)
+void UOverlayUserWidget::ShowReticle(const bool bVisible)
 {
 	if (ReticleImage && bVisible)
 	{
@@ -74,5 +77,13 @@ void UOverlayUserWidget::ShowReticle(bool bVisible)
 	else if (ReticleImage)
 	{
 		ReticleImage->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UOverlayUserWidget::SetReticleColor(const FColor Color)
+{
+	if (ReticleImage)
+	{
+		ReticleImage->SetColorAndOpacity(FLinearColor(Color));
 	}
 }

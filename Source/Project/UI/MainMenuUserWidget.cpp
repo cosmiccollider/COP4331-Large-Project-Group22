@@ -6,16 +6,17 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-// Override Native Construct
 void UMainMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Bind PlayButton to Play() function
 	if (PlayButton)
 	{
 		PlayButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Play);
 	}
 
+	// Bind QuitButton to Quit() function
 	if (QuitButton)
 	{
 		QuitButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Quit);

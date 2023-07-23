@@ -3,31 +3,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Actors/DefaultActor.h"
 #include "FloatingActor.generated.h"
 
+/**
+ * FloatingActor is an Actor that has the ability to float up and down as well as rotate.
+ */
 UCLASS()
-class PROJECT_API AFloatingActor : public AActor
+class PROJECT_API AFloatingActor : public ADefaultActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AFloatingActor();
 
-	// Called every frame
+public:
+	/** Called every frame */
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* VisualMesh;
-
+	/** Specifies the speed at which the actor floats up and down */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FloatingActor")
 	float FloatSpeed = 20.f;
 
+	/** Specifies the speed at which the actor rotates in degrees */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FloatingActor")
 	float RotationSpeed = 20.f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 };

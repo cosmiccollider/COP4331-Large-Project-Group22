@@ -2,6 +2,9 @@
 
 
 #include "DefaultCharacter.h"
+#include "Actors/ButtonActor.h"
+#include "Actors/DefaultActor.h"
+#include "Actors/SimulatedActor.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
@@ -14,6 +17,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Levels/TestMapLevelScriptActor.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "UI/OverlayUserWidget.h"
@@ -25,92 +29,88 @@
 #define ROTATION_SENSITIVITY 0.5f
 #define TRACE_DISTANCE 400
 
-// ==================== Character ====================
-
-// Sets default values
 ADefaultCharacter::ADefaultCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// Set this character to call Tick() every frame
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
-	// Create a CameraComponent
+	// Create a CameraComponent and position it
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	Camera->SetupAttachment(GetCapsuleComponent());
 	Camera->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	Camera->bUsePawnControlRotation = true;
 
-	// Create a physics constraint
+	// Create a PhysicsConstraint and PhysicsHandle
 	PhysicsConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicsConstraintComponent"));
-
-	// Create a physics handle
 	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandleComponent"));
 
-	// Set Default Mapping Context and Input Action default assets
+	// Set DefaultMappingContext to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultMappingContextFinder(TEXT("/Game/Input/IMC_Default.IMC_Default"));
 	if (DefaultMappingContextFinder.Succeeded())
 	{
 		DefaultMappingContext = DefaultMappingContextFinder.Object;
 	}
 
+	// Set CrouchAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> CrouchActionFinder(TEXT("/Game/Input/Actions/IA_Crouch.IA_Crouch"));
 	if (CrouchActionFinder.Succeeded())
 	{
 		CrouchAction = CrouchActionFinder.Object;
 	}
 
+	// Set JumpAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionFinder(TEXT("/Game/Input/Actions/IA_Jump.IA_Jump"));
 	if (JumpActionFinder.Succeeded())
 	{
 		JumpAction = JumpActionFinder.Object;
 	}
 
+	// Set LookAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionFinder(TEXT("/Game/Input/Actions/IA_Look.IA_Look"));
 	if (LookActionFinder.Succeeded())
 	{
 		LookAction = LookActionFinder.Object;
 	}
 
+	// Set MoveAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Game/Input/Actions/IA_Move.IA_Move"));
 	if (MoveActionFinder.Succeeded())
 	{
 		MoveAction = MoveActionFinder.Object;
 	}
 
+	// Set PauseAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> PauseActionFinder(TEXT("/Game/Input/Actions/IA_Pause.IA_Pause"));
 	if (PauseActionFinder.Succeeded())
 	{
 		PauseAction = PauseActionFinder.Object;
 	}
 
+	// Set PrimaryAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> PrimaryActionFinder(TEXT("/Game/Input/Actions/IA_Primary.IA_Primary"));
 	if (PrimaryActionFinder.Succeeded())
 	{
 		PrimaryAction = PrimaryActionFinder.Object;
 	}
 
+	// Set SecondaryAction to data asset object
 	static ConstructorHelpers::FObjectFinder<UInputAction> SecondaryActionFinder(TEXT("/Game/Input/Actions/IA_Secondary.IA_Secondary"));
 	if (SecondaryActionFinder.Succeeded())
 	{
 		SecondaryAction = SecondaryActionFinder.Object;
 	}
 
-	// Set class variables
-	bCanLook = true;
-	bInPauseMenu = false;
-	bIsGrabbing = false;
-	bIsRotating = false;
-
-	// Set Overlay Widget class
+	// Set OverlayClass to OverlayWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<UOverlayUserWidget> OverlayFinder(TEXT("/Game/UI/WBP_Overlay.WBP_Overlay_C"));
 	if (OverlayFinder.Succeeded())
 	{
 		OverlayClass = OverlayFinder.Class;
 	}
 
-	// Set Pause Menu Widget class
+	// Set PauseMenuClass to PauseMenuWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<UPauseMenuUserWidget> PauseMenuFinder(TEXT("/Game/UI/WBP_PauseMenu.WBP_PauseMenu_C"));
 	if (PauseMenuFinder.Succeeded())
 	{
@@ -118,11 +118,26 @@ ADefaultCharacter::ADefaultCharacter()
 	}
 }
 
-// Called every frame
 void ADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Check that the overlay and reticle exist
+	if (Overlay && Overlay->GetReticle())
+	{
+		// Check that the player is looking at a DefaultActor (or any of its subclasses) and change the color of the reticle to reflect that
+		FHitResult OutHit;
+		if (LineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ADefaultActor::StaticClass()))
+		{
+			Overlay->SetReticleColor(FColor::Green);
+		}
+		else
+		{
+			Overlay->SetReticleColor(FColor::White);
+		}
+	}
+
+	// Check that the player is grabbing or rotating an object to update its location or rotation
 	if (bIsGrabbing)
 	{
 		MoveObject();
@@ -134,7 +149,6 @@ void ADefaultCharacter::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
 void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -168,7 +182,6 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
-// Called when the game starts or when spawned
 void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -187,7 +200,7 @@ void ADefaultCharacter::BeginPlay()
 			Overlay = CreateWidget<UOverlayUserWidget>(PC, OverlayClass);
 			Overlay->AddToViewport();
 
-			// Only add the reticle if we are not in the main menu
+			// Only add the reticle if the character is not in the main menu
 			if (UGameplayStatics::GetCurrentLevelName(GetWorld()) != MAIN_MENU_MAP)
 			{
 				Overlay->ShowReticle(true);
@@ -196,15 +209,6 @@ void ADefaultCharacter::BeginPlay()
 	}
 }
 
-// Get Overlay User Widget
-UOverlayUserWidget* ADefaultCharacter::GetOverlay()
-{
-	return Overlay;
-}
-
-// ==================== Input Actions ====================
-
-// Called to toggle crouch input
 void ADefaultCharacter::ToggleCrouch()
 {
 	if (GetCharacterMovement()->IsCrouching())
@@ -218,7 +222,6 @@ void ADefaultCharacter::ToggleCrouch()
 	}
 }
 
-// Called to trigger look input
 void ADefaultCharacter::Look(const FInputActionValue& Value)
 {
 	// Input is a Vector2D
@@ -232,7 +235,6 @@ void ADefaultCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-// Called to trigger move input
 void ADefaultCharacter::Move(const FInputActionValue& Value)
 {
 	// Input is a Vector2D
@@ -246,7 +248,6 @@ void ADefaultCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-// Called to open or close pause menu widget
 void ADefaultCharacter::Pause()
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -256,7 +257,7 @@ void ADefaultCharacter::Pause()
 		// Center mouse so the player doesn't have to spend time finding the mouse when it becomes visible
 		SetMouseCenter();
 
-		// Create Pause Menu widget and add it to the screen
+		// Create Pause Menu and add it to the screen
 		PauseMenu = CreateWidget<UPauseMenuUserWidget>(PC, PauseMenuClass);
 		PauseMenu->AddToViewport();
 
@@ -286,13 +287,14 @@ void ADefaultCharacter::Pause()
 	}
 }
 
-// Called to start primary mouse input
 void ADefaultCharacter::StartPrimary()
 {
-	StartGrab();
+	FHitResult OutHit;
+
+	PressButton(OutHit);
+	StartGrab(OutHit);
 }
 
-// Called to stop primary mouse input
 void ADefaultCharacter::StopPrimary()
 {
 	if (bIsGrabbing)
@@ -301,7 +303,6 @@ void ADefaultCharacter::StopPrimary()
 	}
 }
 
-// Called to start secondary mouse input
 void ADefaultCharacter::StartSecondary()
 {
 	if (bIsGrabbing)
@@ -310,7 +311,6 @@ void ADefaultCharacter::StartSecondary()
 	}
 }
 
-// Called to stop secondary mouse input
 void ADefaultCharacter::StopSecondary()
 {
 	if (bIsRotating)
@@ -319,9 +319,22 @@ void ADefaultCharacter::StopSecondary()
 	}
 }
 
-// ==================== Physics ====================
+void ADefaultCharacter::PressButton(FHitResult& OutHit)
+{
+	// Check that the actor in from of the player is a ButtonActor
+	if (LineTrace(OutHit) && OutHit.GetActor()->GetClass() == AButtonActor::StaticClass())
+	{
+		AButtonActor* Button = Cast<AButtonActor>(OutHit.GetActor());
 
-void ADefaultCharacter::SetGravity(bool bEnabled)
+		// Determine which level script is currently active and call the relative function for that level
+		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetLevel()->GetLevelScriptActor()))
+		{
+			TestMapLevelScript->ButtonPressed(Button);
+		}
+	}
+}
+
+void ADefaultCharacter::SetGravity(const bool bEnabled)
 {
 	if (bEnabled)
 	{
@@ -333,70 +346,50 @@ void ADefaultCharacter::SetGravity(bool bEnabled)
 	}
 }
 
-// Called to start grabbing an object
-void ADefaultCharacter::StartGrab()
+void ADefaultCharacter::StartGrab(FHitResult& OutHit)
 {
-	if (Camera)
+	// Check that the actor in front of the player is a SimulatedActor
+	if (LineTrace(OutHit) && OutHit.GetActor()->GetClass() == ASimulatedActor::StaticClass())
 	{
-		// Set the distance to trace, which defines the delta from the start point (current location of the camera) to the end point
-		FVector TraceDistance = Camera->GetComponentRotation().Vector() * TRACE_DISTANCE;
-		FVector Start = Camera->GetComponentLocation();
-		FVector End = Start + TraceDistance;
-
-		// Create a line trace and check that it finds a hit result
-		FHitResult OutHit;
-		bool LineTrace = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery(), false, TArray<AActor*>(), EDrawDebugTrace::ForDuration, OutHit, true);
-		if (LineTrace && PhysicsHandle)
-		{
-			// Initialize a zeroed FRotator and grab the hit result with that rotation
-			// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0
-			// If it isn't initilized at 0, the rotation will be offset when starting to rotating, since rotating operates on a delta with the center of the screen
-			FRotator Rotation = FRotator(0);
-			PhysicsHandle->GrabComponentAtLocationWithRotation(OutHit.GetComponent(), FName(), OutHit.GetComponent()->GetComponentLocation(), Rotation);
-			bIsGrabbing = true;
-		}
+		// Initialize a zeroed FRotator and grab the hit result with that rotation
+		// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0
+		// If it isn't initilized at 0, the rotation will be offset when starting to rotating, since rotating operates on a delta with the center of the screen
+		FRotator Rotation = FRotator(0);
+		PhysicsHandle->GrabComponentAtLocationWithRotation(OutHit.GetComponent(), FName(), OutHit.GetComponent()->GetComponentLocation(), Rotation);
+		bIsGrabbing = true;
 	}
 }
 
-// Called to stop grabbing an object
 void ADefaultCharacter::StopGrab()
 {
-	// Release object and disable grabbing
 	PhysicsHandle->ReleaseComponent();
 	bIsGrabbing = false;
 }
 
-// Called to update the location of a grabbed object
 void ADefaultCharacter::MoveObject()
 {
 	// Get location as a distance from the camera based on current rotation
 	FVector HoldDistance = Camera->GetComponentRotation().Vector() * HOLD_DISTANCE;
 	FVector Location = Camera->GetComponentLocation() + HoldDistance;
 
-	// Set location of object
 	PhysicsHandle->SetTargetLocation(Location);
 }
 
-// Called to start rotating an object
 void ADefaultCharacter::StartRotation()
 {
 	// Center mouse to allow for the most possible rotation in any direction, since the mouse stops at the edge of the screen
 	SetMouseCenter();
 
-	// Disable looking and enable rotating
 	bCanLook = false;
 	bIsRotating = true;
 }
 
-// Called to stop rotating an object
 void ADefaultCharacter::StopRotation()
 {
-	// Disable rotating and enable looking
 	bIsRotating = false;
 	bCanLook = true;
 }
 
-// Called to update the rotation of a grabbed object
 void ADefaultCharacter::RotateObject()
 {
 	// Get the current mouse position
@@ -414,15 +407,30 @@ void ADefaultCharacter::RotateObject()
 	PhysicsHandle->SetTargetRotation(UKismetMathLibrary::MakeRotator(0.0f, Pitch, Yaw));
 }
 
-// ==================== Helpers ====================
-
-// Called to set the mouse location to the center of the screen
 void ADefaultCharacter::SetMouseCenter()
 {
-	// Get player controller and size of screen
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
 
-	// Set mouse location
 	PC->SetMouseLocation(UKismetMathLibrary::FTrunc(ViewportSize.X / 2.0f), UKismetMathLibrary::FTrunc(ViewportSize.Y / 2.0f));
+}
+
+bool ADefaultCharacter::LineTrace(FHitResult& OutHit)
+{
+	if (Camera)
+	{
+		// Set the distance to trace, which defines the delta from the start point (current location of the camera) to the end point
+		FVector TraceDistance = Camera->GetComponentRotation().Vector() * TRACE_DISTANCE;
+		FVector Start = Camera->GetComponentLocation();
+		FVector End = Start + TraceDistance;
+
+		// Create a line trace and check that it finds a hit result
+		bool LineTrace = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery(), false, TArray<AActor*>(), EDrawDebugTrace::None, OutHit, true);
+		if (LineTrace && PhysicsHandle)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

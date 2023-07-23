@@ -10,73 +10,82 @@
 #include "Components/WidgetSwitcher.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Types/SlateEnums.h"
 #include "UI/OverlayUserWidget.h"
 
 #define LOCTEXT_NAMESPACE "FPS"
 
-// Override Native Construct
 void USettingsMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Set Buttons
+	// Bind SettingsButton to Settings() function
 	if (SettingsButton)
 	{
 		SettingsButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Settings);
 	}
 
+	// Bind BackButton to Back() function
 	if (BackButton)
 	{
 		BackButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::Back);
 	}
 
+	// Bind WindowModeWindowedButton to SetWindowed() function
 	if (WindowModeWindowedButton)
 	{
 		WindowModeWindowedButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetWindowed);
 	}
 
+	// Bind WindowModeFullscreenButton to SetFullscreen() function
 	if (WindowModeFullscreenButton)
 	{
 		WindowModeFullscreenButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetFullscreen);
 	}
 
+	// Bind Resolution1280x720Button to SetResolution1280x720() function
 	if (Resolution1280x720Button)
 	{
 		Resolution1280x720Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1280x720);
 	}
 
+	// Bind Resolution1920x1080Button to SetResolution1920x1080() function
 	if (Resolution1920x1080Button)
 	{
 		Resolution1920x1080Button->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetResolution1920x1080);
 	}
 
+	// Bind QualityLowButton to SetQualityLow() function
 	if (QualityLowButton)
 	{
 		QualityLowButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityLow);
 	}
 
+	// Bind QualityMediumButton to SetQualityMedium() function
 	if (QualityMediumButton)
 	{
 		QualityMediumButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityMedium);
 	}
 
+	// Bind QualityHighButton to SetQualityHigh() function
 	if (QualityHighButton)
 	{
 		QualityHighButton->OnClicked.AddDynamic(this, &USettingsMenuUserWidget::SetQualityHigh);
 	}
 
+	// Bind FPSCheckBox to ShowFPS() function
 	if (FPSCheckBox)
 	{
 		FPSCheckBox->OnCheckStateChanged.AddDynamic(this, &USettingsMenuUserWidget::ShowFPS);
 	}
 
+	// Bind MaxFPSTextBox to CheckMaxFPS() function on text changed
 	if (MaxFPSTextBox)
 	{
 		MaxFPSTextBox->OnTextChanged.AddDynamic(this, &USettingsMenuUserWidget::CheckMaxFPS);
 	}
 
+	// Bind MaxFPSTextBox to SetMaxFPS() function on text committed
 	if (MaxFPSTextBox)
 	{
 		MaxFPSTextBox->OnTextCommitted.AddDynamic(this, &USettingsMenuUserWidget::SetMaxFPS);
@@ -100,19 +109,16 @@ void USettingsMenuUserWidget::NativeConstruct()
 	MaxFPSTextBox->SetText(FText::Format(LOCTEXT("FPS", "{FPS}"), Console->GetInt()));
 }
 
-// Settings Function
 void USettingsMenuUserWidget::Settings()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
-// Back Function
 void USettingsMenuUserWidget::Back()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(0);
 }
 
-// Window Mode Functions
 void USettingsMenuUserWidget::SetWindowed()
 {
 	UGameUserSettings* Settings = UGameUserSettings::GetGameUserSettings();
@@ -127,8 +133,7 @@ void USettingsMenuUserWidget::SetFullscreen()
 	Settings->ApplyResolutionSettings(false);
 }
 
-// Resolution Functions
-void USettingsMenuUserWidget::SetResolution(FIntPoint Resolution)
+void USettingsMenuUserWidget::SetResolution(const FIntPoint Resolution)
 {
 	UGameUserSettings* Settings = UGameUserSettings::GetGameUserSettings();
 	Settings->SetScreenResolution(Resolution);
@@ -147,8 +152,7 @@ void USettingsMenuUserWidget::SetResolution1920x1080()
 	SetResolution(Resolution);
 }
 
-// Quality Functions
-void USettingsMenuUserWidget::SetQuality(int32 Value)
+void USettingsMenuUserWidget::SetQuality(const int32 Value)
 {
 	UGameUserSettings* Settings = UGameUserSettings::GetGameUserSettings();
 	Settings->SetOverallScalabilityLevel(Value);
@@ -170,8 +174,7 @@ void USettingsMenuUserWidget::SetQualityHigh()
 	SetQuality(2);
 }
 
-// FPS Functions
-void USettingsMenuUserWidget::ShowFPS(bool bIsChecked)
+void USettingsMenuUserWidget::ShowFPS(const bool bIsChecked)
 {
 	ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
@@ -194,7 +197,7 @@ void USettingsMenuUserWidget::CheckMaxFPS(const FText& Text)
 	}
 }
 
-void USettingsMenuUserWidget::SetMaxFPS(const FText& Text, ETextCommit::Type CommitMethod)
+void USettingsMenuUserWidget::SetMaxFPS(const FText& Text, const ETextCommit::Type CommitMethod)
 {
 	if (CommitMethod == ETextCommit::OnEnter)
 	{

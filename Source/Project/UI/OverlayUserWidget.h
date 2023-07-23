@@ -11,7 +11,7 @@ class UImage;
 class UTextBlock;
 
 /**
- * 
+ * OverlayUserWidget provides a HUD for the player character which delivers information
  */
 UCLASS()
 class PROJECT_API UOverlayUserWidget : public UUserWidget
@@ -19,36 +19,70 @@ class PROJECT_API UOverlayUserWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	// Overrides
+	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
-	// FPS
-	UFUNCTION()
-	void ShowFPS(bool bVisible);
+	/** Stores the FPSText for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* FPSText;
 
+	/**
+	 * Called to show or hide the FPS counter
+	 *
+	 * @param	bVisible	specify true to show FPS counter
+	 */
+	UFUNCTION()
+	void ShowFPS(const bool bVisible);
+
+	/** Called to update the text inside the FPS counter */
 	UFUNCTION()
 	void SetFPSText();
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UTextBlock* FPSText;
-
-	// Narrative
-	UFUNCTION()
-	void ShowNarrative(bool bVisible);
-
-	UFUNCTION()
-	void SetNarrativeText(FText Text);
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	/** Stores the NarrativeBorder for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UBorder* NarrativeBorder;
 	
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	/** Stores the NarrativeText for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* NarrativeText;
-	
-	// Reticle
-	UFUNCTION()
-	void ShowReticle(bool bVisible);
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	/**
+	 * Called to show or hide the narrative content
+	 *
+	 * @param	bVisible	specify true to show narrative content
+	 */
+	UFUNCTION()
+	void ShowNarrative(const bool bVisible);
+
+	/**
+	 * Called to set the text content of NarrativeText
+	 *
+	 * @param	Text	specifies an FText to change the text content to
+	 */
+	UFUNCTION()
+	void SetNarrativeText(const FText Text);
+	
+	/** Stores the ReticleImage for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UImage* ReticleImage;
+
+	/**
+	 * Called to show or hide the reticle
+	 *
+	 * @param	bVisible	specify true to show reticle
+	 */
+	UFUNCTION()
+	void ShowReticle(const bool bVisible);
+
+	/**
+	 * Called to set the color of the reticle
+	 *
+	 * @param	Color	specifies an FColor to change the reticle to
+	 */
+	UFUNCTION()
+	void SetReticleColor(const FColor Color);
+	
+	/** Returns the ReticleImage for this widget */
+	UFUNCTION()
+	UImage* GetReticle() const { return ReticleImage; };
 };

@@ -7,7 +7,7 @@
 #include "DefaultGameModeBase.generated.h"
 
 /**
- * 
+ * DefaultGameModeBase is the standard game mode used for all maps.
  */
 UCLASS()
 class PROJECT_API ADefaultGameModeBase : public AGameModeBase

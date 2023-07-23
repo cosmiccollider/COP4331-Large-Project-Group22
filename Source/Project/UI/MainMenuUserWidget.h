@@ -9,7 +9,7 @@
 class UButton;
 
 /**
- * 
+ * MainMenuUserWidget provides a user interface for use on the MainMenuMap
  */
 UCLASS()
 class PROJECT_API UMainMenuUserWidget : public USettingsMenuUserWidget
@@ -17,20 +17,22 @@ class PROJECT_API UMainMenuUserWidget : public USettingsMenuUserWidget
 	GENERATED_BODY()
 	
 protected:
-	// Overrides
+	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
-	// Main Menu Functions
+	/** Stores the PlayButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* PlayButton;
+	
+	/** Called to start a new game on the first level */
 	UFUNCTION()
 	void Play();
 
+	/** Stores the QuitButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* QuitButton;
+
+	/** Called to quit the game to the desktop */
 	UFUNCTION()
 	void Quit();
-
-	// Main Menu Buttons
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* PlayButton;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* QuitButton;
 };

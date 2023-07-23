@@ -2,48 +2,79 @@
 
 
 #include "Levels/TestMapLevelScriptActor.h"
-#include "Actors/DefaultCharacter.h"
-#include "Actors/PhysicsStaticMeshActor.h"
-#include "Kismet/GameplayStatics.h"
+#include "Actors/ButtonActor.h"
+#include "Actors/SimulatedActor.h"
 
-#define TEST_CUBE_ID "StaticMeshActor_0"
-#define TEST_BOX_ID "StaticMeshActor_10"
+#define GRAVITY_SWITCH_ID "ButtonActor_1"
+#define TEST_CUBE_ID "PhysicsActor_6"
+#define TEST_BOX_ID "PhysicsActor_1"
 
 ATestMapLevelScriptActor::ATestMapLevelScriptActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-// Called every frame
 void ATestMapLevelScriptActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Check that all objects and containers exist
 	if (TestCube && TestBox)
 	{
+		// Check that all objects are inside their respective containers
 		if (IsObjectInContainer(TestCube, TestBox))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Success!"));
+			// TODO:
+			// Once all objects are in the container:
+			// Replace container with a new "completed" mesh
+			// Set a level specific boolean to true as one of the "checks" for finishing the level
+			// Set all pointers = nullptr so the function doesnt get called anymore (for performance purposes)
 		}
 	}
 }
 
-// Called when the game starts or when spawned
 void ATestMapLevelScriptActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Find key items in the level by their ID Name and assign them to references
-	for (APhysicsStaticMeshActor* PhysicsActor : PhysicsActorArray)
+	// Find SimulatedActors in the level by their ID Name and assign them to references
+	for (ASimulatedActor* SimulatedActor : SimulatedActorArray)
 	{
-		if (PhysicsActor->GetName() == TEST_CUBE_ID)
+		if (SimulatedActor->GetName() == TEST_CUBE_ID)
 		{
-			TestCube = PhysicsActor;
+			TestCube = SimulatedActor;
 		}
 
-		if (PhysicsActor->GetName() == TEST_BOX_ID)
+		if (SimulatedActor->GetName() == TEST_BOX_ID)
 		{
-			TestBox = PhysicsActor;
+			TestBox = SimulatedActor;
 		}
+	}
+
+	// Find ButtonActors in the level by their ID Name and assign them to references
+	for (AButtonActor* ButtonActor : ButtonActorArray)
+	{
+		if (ButtonActor->GetName() == GRAVITY_SWITCH_ID)
+		{
+			GravitySwitch = ButtonActor;
+		}
+	}
+
+	// Set GravitySwitch to active
+	if (GravitySwitch)
+	{
+		GravitySwitch->bIsActive = true;
+		GravitySwitch->FlipSwitch(GravitySwitch->bIsActive);
+	}
+}
+
+void ATestMapLevelScriptActor::ButtonPressed(AButtonActor* const Button)
+{
+	if (Button == GravitySwitch)
+	{
+		Button->bIsActive = !Button->bIsActive;
+		Button->FlipSwitch(Button->bIsActive);
+		SetGravity(Button->bIsActive);
 	}
 }

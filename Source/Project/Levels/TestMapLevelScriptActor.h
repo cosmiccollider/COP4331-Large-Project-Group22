@@ -6,10 +6,11 @@
 #include "Levels/DefaultLevelScriptActor.h"
 #include "TestMapLevelScriptActor.generated.h"
 
-class APhysicsStaticMeshActor;
+class AButtonActor;
+class ASimulatedActor;
 
 /**
- * 
+ * TestMapLevelScriptActor provides the level specific capabilities of the TestMap.
  */
 UCLASS()
 class PROJECT_API ATestMapLevelScriptActor : public ADefaultLevelScriptActor
@@ -19,16 +20,30 @@ class PROJECT_API ATestMapLevelScriptActor : public ADefaultLevelScriptActor
 public:
 	ATestMapLevelScriptActor();
 
-	// Called every frame
+	/** Called every frame */
 	virtual void Tick(float DeltaTime) override;
 
+	/** Stores the GravitySwitch for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	APhysicsStaticMeshActor* TestCube;
+	AButtonActor* GravitySwitch;
 
+	/** Stores the TestCube for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	APhysicsStaticMeshActor* TestBox;
+	ASimulatedActor* TestCube;
+
+	/** Stores the TestBox for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* TestBox;
+
+	/**
+	 * Triggers an event within the level based on the button that was pressed
+	 *
+	 * @param	Button		specifies the specific button that was pressed
+	 */
+	UFUNCTION()
+	void ButtonPressed(AButtonActor* const Button);
 
 protected:
-	// Called when the game starts or when spawned
+	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 };

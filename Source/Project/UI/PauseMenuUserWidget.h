@@ -9,7 +9,7 @@
 class UButton;
 
 /**
- * 
+ * PauseMenuUserWidget provides a user interface for the player to use game systems while the game is paused
  */
 UCLASS()
 class PROJECT_API UPauseMenuUserWidget : public USettingsMenuUserWidget
@@ -17,32 +17,38 @@ class PROJECT_API UPauseMenuUserWidget : public USettingsMenuUserWidget
 	GENERATED_BODY()
 	
 protected:
-	// Overrides
+	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
-	// Pause Menu Functions
+	/** Stores the ResumeButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* ResumeButton;
+	
+	/** Called to resume play on the current level */
 	UFUNCTION()
 	void Resume();
 
+	/** Stores the RestartButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* RestartButton;
+	
+	/** Called to restart the current level */
 	UFUNCTION()
 	void Restart();
+
+	/** Stores the MainMenuButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* MainMenuButton;
 	
+	/** Called to quit the game to the main menu */
 	UFUNCTION()
 	void MainMenu();
+
+	/** Stores the DesktopButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* DesktopButton;
 	
+	/** Called to quit the game to the desktop */
 	UFUNCTION()
 	void Desktop();
-
-	// Pause Menu Buttons
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* ResumeButton;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* RestartButton;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* MainMenuButton;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UButton* DesktopButton;
 };
