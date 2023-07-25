@@ -17,7 +17,7 @@ class PROJECT_API AButtonActor : public ADefaultActor
 public:
 	/** Determines whether a switch is currently on or off */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsActive;
+	bool bIsActive = true;
 
 	/**
 	 * Rotates the static mesh component of a switch to an on or off position

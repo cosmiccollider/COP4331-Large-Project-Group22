@@ -18,6 +18,9 @@ void UOverlayUserWidget::NativeConstruct()
 	ShowFPS(false);
 	ShowNarrative(false);
 	ShowReticle(false);
+
+	// Fade the screen from black
+	PlayTransitionAnimation(EUMGSequencePlayMode::Reverse);
 }
 
 void UOverlayUserWidget::ShowFPS(const bool bVisible)
@@ -41,6 +44,7 @@ void UOverlayUserWidget::SetFPSText()
 {
 	if (FPSText)
 	{
+		// Get the time since the last frame and update the FPS with it
 		float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
 		FPSText->SetText(FText::Format(LOCTEXT("FPS", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
 	}
@@ -85,5 +89,39 @@ void UOverlayUserWidget::SetReticleColor(const FColor Color)
 	if (ReticleImage)
 	{
 		ReticleImage->SetColorAndOpacity(FLinearColor(Color));
+	}
+}
+
+void UOverlayUserWidget::PlayTransitionAnimation(const EUMGSequencePlayMode::Type PlayMode)
+{
+	if (TransitionAnimation)
+	{
+		ShowTransition(true);
+
+		if (PlayMode == EUMGSequencePlayMode::Forward)
+		{
+			UUserWidget::PlayAnimationForward(TransitionAnimation);
+		}
+		else if (PlayMode == EUMGSequencePlayMode::Reverse)
+		{
+			UUserWidget::PlayAnimationReverse(TransitionAnimation);
+
+			// Create a timer for the transition image to be hidden after the animation is done
+			FTimerHandle TransitionTimer;
+			FTimerDelegate TransitionHidden = FTimerDelegate::CreateUFunction(this, FName("ShowTransition"), false);
+			GetWorld()->GetTimerManager().SetTimer(TransitionTimer, TransitionHidden, 1.0f, false);
+		}
+	}
+}
+
+void UOverlayUserWidget::ShowTransition(const bool bVisible)
+{
+	if (TransitionImage && bVisible)
+	{
+		TransitionImage->SetVisibility(ESlateVisibility::Visible);
+	}
+	else if (TransitionImage)
+	{
+		TransitionImage->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

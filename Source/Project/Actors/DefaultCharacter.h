@@ -58,7 +58,7 @@ public:
 	UPhysicsHandleComponent* PhysicsHandle;
 
 //~==================================================
-// Input
+// Input Actions
 
 public:
 	/** Stores the DefaultMappingContext for this actor */
@@ -159,7 +159,7 @@ public:
 	UPauseMenuUserWidget* PauseMenu;
 
 //~==================================================
-// Actions
+// Abilities
 
 public:
 	/**
@@ -171,6 +171,14 @@ public:
 	void SetGravity(const bool bEnabled);
 
 protected:
+	/**
+	 * Allows this character to trigger ButtonActor events within a level
+	 *
+	 * @param	OutHit		specifies a hit result from a line trace
+	 */
+	UFUNCTION()
+	void EndLevel(FHitResult& OutHit);
+
 	/**
 	 * Allows this character to trigger ButtonActor events within a level
 	 *
@@ -218,16 +226,20 @@ protected:
 //~==================================================
 // Helpers
 
+public:
+	/** Starts the transition animation for this character's overlay */
+	void StartOverlayTransition();
+
 protected:
 	/** Updates the location of the mouse to be the center of the screen */
 	UFUNCTION()
 	void SetMouseCenter();
 
 	/**
-	 * Draws a single line trace from the camera to a set distance in front of the character
+	 * Attempts to draw a line trace from the camera to a set distance in front of the character
 	 *
 	 * @param	OutHit		specifies a hit result from the line trace
 	 */
 	UFUNCTION()
-	bool LineTrace(FHitResult& OutHit);
+	bool CanLineTrace(FHitResult& OutHit);
 };

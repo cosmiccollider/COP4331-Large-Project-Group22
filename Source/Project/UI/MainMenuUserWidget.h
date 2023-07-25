@@ -8,6 +8,13 @@
 
 class UButton;
 
+UENUM()
+enum class EMainMenuButton : uint8
+{
+	Play,
+	Quit
+};
+
 /**
  * MainMenuUserWidget provides a user interface for use on the MainMenuMap
  */
@@ -20,6 +27,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
+protected:
 	/** Stores the PlayButton for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UButton* PlayButton;
@@ -35,4 +43,20 @@ protected:
 	/** Called to quit the game to the desktop */
 	UFUNCTION()
 	void Quit();
+
+	/**
+	 * Called to trigger the transition animation and change the level
+	 *
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void StartTransition(const EMainMenuButton Button);
+	
+	/**
+	 * Called to trigger a level change based on the button pressed
+	 *
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void ChangeLevel(const EMainMenuButton Button);
 };

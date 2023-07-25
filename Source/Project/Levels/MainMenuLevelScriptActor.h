@@ -19,6 +19,11 @@ class PROJECT_API AMainMenuLevelScriptActor : public ALevelScriptActor
 public:
 	AMainMenuLevelScriptActor();
 
+protected:
+	/** Called when the game starts or when spawned */
+	virtual void BeginPlay() override;
+
+public:
 	/** Stores the class of MainMenuUserWidget */
 	UPROPERTY(VisibleAnywhere)
 	TSubclassOf<UMainMenuUserWidget> MainMenuClass;
@@ -26,8 +31,4 @@ public:
 	/** Stores the MainMenu for this level */
 	UPROPERTY()
 	UMainMenuUserWidget* MainMenu;
-
-protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
 };

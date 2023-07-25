@@ -23,6 +23,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
+protected:
 	/** Stores the WidgetSwitcher for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UWidgetSwitcher* WidgetSwitcher;
@@ -98,7 +99,7 @@ protected:
 	/**
 	 * Called to set the graphics quality of the game
 	 *
-	 * @param	Value		specifies an int32 that represents a overall quality preset
+	 * @param	Value		specifies an int32 that represents an overall quality preset
 	 */
 	UFUNCTION()
 	void SetQuality(const int32 Value);

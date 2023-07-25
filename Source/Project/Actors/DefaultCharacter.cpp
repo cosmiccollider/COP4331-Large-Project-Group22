@@ -5,6 +5,7 @@
 #include "Actors/ButtonActor.h"
 #include "Actors/DefaultActor.h"
 #include "Actors/SimulatedActor.h"
+#include "Actors/TransitionActor.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
@@ -24,6 +25,7 @@
 #include "UI/PauseMenuUserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
+#define CREDITS_MAP "CreditsMap"
 #define HOLD_DISTANCE 200
 #define MAIN_MENU_MAP "MainMenuMap"
 #define ROTATION_SENSITIVITY 0.5f
@@ -47,56 +49,56 @@ ADefaultCharacter::ADefaultCharacter()
 	PhysicsConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicsConstraintComponent"));
 	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandleComponent"));
 
-	// Set DefaultMappingContext to data asset object
+	// Set DefaultMappingContext to IMC_Default data asset
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultMappingContextFinder(TEXT("/Game/Input/IMC_Default.IMC_Default"));
 	if (DefaultMappingContextFinder.Succeeded())
 	{
 		DefaultMappingContext = DefaultMappingContextFinder.Object;
 	}
 
-	// Set CrouchAction to data asset object
+	// Set CrouchAction to IA_Crouch data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> CrouchActionFinder(TEXT("/Game/Input/Actions/IA_Crouch.IA_Crouch"));
 	if (CrouchActionFinder.Succeeded())
 	{
 		CrouchAction = CrouchActionFinder.Object;
 	}
 
-	// Set JumpAction to data asset object
+	// Set JumpAction to IA_Jump data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionFinder(TEXT("/Game/Input/Actions/IA_Jump.IA_Jump"));
 	if (JumpActionFinder.Succeeded())
 	{
 		JumpAction = JumpActionFinder.Object;
 	}
 
-	// Set LookAction to data asset object
+	// Set LookAction to IA_Look data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionFinder(TEXT("/Game/Input/Actions/IA_Look.IA_Look"));
 	if (LookActionFinder.Succeeded())
 	{
 		LookAction = LookActionFinder.Object;
 	}
 
-	// Set MoveAction to data asset object
+	// Set MoveAction to IA_Move data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionFinder(TEXT("/Game/Input/Actions/IA_Move.IA_Move"));
 	if (MoveActionFinder.Succeeded())
 	{
 		MoveAction = MoveActionFinder.Object;
 	}
 
-	// Set PauseAction to data asset object
+	// Set PauseAction to IA_Pause data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> PauseActionFinder(TEXT("/Game/Input/Actions/IA_Pause.IA_Pause"));
 	if (PauseActionFinder.Succeeded())
 	{
 		PauseAction = PauseActionFinder.Object;
 	}
 
-	// Set PrimaryAction to data asset object
+	// Set PrimaryAction to IA_Primary data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> PrimaryActionFinder(TEXT("/Game/Input/Actions/IA_Primary.IA_Primary"));
 	if (PrimaryActionFinder.Succeeded())
 	{
 		PrimaryAction = PrimaryActionFinder.Object;
 	}
 
-	// Set SecondaryAction to data asset object
+	// Set SecondaryAction to IA_Secondary data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> SecondaryActionFinder(TEXT("/Game/Input/Actions/IA_Secondary.IA_Secondary"));
 	if (SecondaryActionFinder.Succeeded())
 	{
@@ -127,7 +129,7 @@ void ADefaultCharacter::Tick(float DeltaTime)
 	{
 		// Check that the player is looking at a DefaultActor (or any of its subclasses) and change the color of the reticle to reflect that
 		FHitResult OutHit;
-		if (LineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ADefaultActor::StaticClass()))
+		if (CanLineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ADefaultActor::StaticClass()))
 		{
 			Overlay->SetReticleColor(FColor::Green);
 		}
@@ -200,8 +202,9 @@ void ADefaultCharacter::BeginPlay()
 			Overlay = CreateWidget<UOverlayUserWidget>(PC, OverlayClass);
 			Overlay->AddToViewport();
 
-			// Only add the reticle if the character is not in the main menu
-			if (UGameplayStatics::GetCurrentLevelName(GetWorld()) != MAIN_MENU_MAP)
+			// Only add the reticle if the character is not in the main menu or credits
+			FString CurrentLevel = UGameplayStatics::GetCurrentLevelName(GetWorld());
+			if (CurrentLevel != MAIN_MENU_MAP && CurrentLevel != CREDITS_MAP)
 			{
 				Overlay->ShowReticle(true);
 			}
@@ -291,6 +294,7 @@ void ADefaultCharacter::StartPrimary()
 {
 	FHitResult OutHit;
 
+	EndLevel(OutHit);
 	PressButton(OutHit);
 	StartGrab(OutHit);
 }
@@ -319,10 +323,25 @@ void ADefaultCharacter::StopSecondary()
 	}
 }
 
+void ADefaultCharacter::EndLevel(FHitResult& OutHit)
+{
+	// Check that the actor in front of the player is a TransitionActor
+	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == ATransitionActor::StaticClass())
+	{
+		ATransitionActor* Actor = Cast<ATransitionActor>(OutHit.GetActor());
+
+		// Determine which level script is currently active and call the relative function for that level
+		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetLevel()->GetLevelScriptActor()))
+		{
+			TestMapLevelScript->EndLevel(Actor);
+		}
+	}
+}
+
 void ADefaultCharacter::PressButton(FHitResult& OutHit)
 {
-	// Check that the actor in from of the player is a ButtonActor
-	if (LineTrace(OutHit) && OutHit.GetActor()->GetClass() == AButtonActor::StaticClass())
+	// Check that the actor in front of the player is a ButtonActor
+	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == AButtonActor::StaticClass())
 	{
 		AButtonActor* Button = Cast<AButtonActor>(OutHit.GetActor());
 
@@ -349,7 +368,7 @@ void ADefaultCharacter::SetGravity(const bool bEnabled)
 void ADefaultCharacter::StartGrab(FHitResult& OutHit)
 {
 	// Check that the actor in front of the player is a SimulatedActor
-	if (LineTrace(OutHit) && OutHit.GetActor()->GetClass() == ASimulatedActor::StaticClass())
+	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == ASimulatedActor::StaticClass())
 	{
 		// Initialize a zeroed FRotator and grab the hit result with that rotation
 		// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0
@@ -407,6 +426,14 @@ void ADefaultCharacter::RotateObject()
 	PhysicsHandle->SetTargetRotation(UKismetMathLibrary::MakeRotator(0.0f, Pitch, Yaw));
 }
 
+void ADefaultCharacter::StartOverlayTransition()
+{
+	if (Overlay)
+	{
+		Overlay->PlayTransitionAnimation(EUMGSequencePlayMode::Forward);
+	}
+}
+
 void ADefaultCharacter::SetMouseCenter()
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -415,7 +442,7 @@ void ADefaultCharacter::SetMouseCenter()
 	PC->SetMouseLocation(UKismetMathLibrary::FTrunc(ViewportSize.X / 2.0f), UKismetMathLibrary::FTrunc(ViewportSize.Y / 2.0f));
 }
 
-bool ADefaultCharacter::LineTrace(FHitResult& OutHit)
+bool ADefaultCharacter::CanLineTrace(FHitResult& OutHit)
 {
 	if (Camera)
 	{

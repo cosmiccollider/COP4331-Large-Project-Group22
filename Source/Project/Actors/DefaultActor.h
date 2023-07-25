@@ -22,6 +22,11 @@ public:
 	/** Called every frame */
 	virtual void Tick(float DeltaTime) override;
 
+protected:
+	/** Called when the game starts or when spawned */
+	virtual void BeginPlay() override;
+
+public:
 	/** Stores the StaticMeshComponent for this actor */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMeshComponent;
@@ -29,8 +34,4 @@ public:
 	/** Returns the StaticMeshComponent of this actor */
 	UFUNCTION()
 	UStaticMeshComponent* GetStaticMeshComponent() const { return StaticMeshComponent; }
-
-protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
 };

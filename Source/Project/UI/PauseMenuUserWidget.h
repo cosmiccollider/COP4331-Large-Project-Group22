@@ -8,6 +8,15 @@
 
 class UButton;
 
+UENUM()
+enum class EPauseMenuButton : uint8
+{
+	Resume,
+	Restart,
+	MainMenu,
+	Desktop
+};
+
 /**
  * PauseMenuUserWidget provides a user interface for the player to use game systems while the game is paused
  */
@@ -20,6 +29,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
+protected:
 	/** Stores the ResumeButton for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UButton* ResumeButton;
@@ -51,4 +61,20 @@ protected:
 	/** Called to quit the game to the desktop */
 	UFUNCTION()
 	void Desktop();
+
+	/**
+	 * Called to trigger the transition animation and change the level
+	 * 
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void StartTransition(const EPauseMenuButton Button);
+	
+	/**
+	 * Called to trigger a level change based on the button pressed
+	 *
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void ChangeLevel(const EPauseMenuButton Button);
 };

@@ -3,11 +3,17 @@
 
 #include "Levels/TestMapLevelScriptActor.h"
 #include "Actors/ButtonActor.h"
+#include "Actors/DefaultCharacter.h"
 #include "Actors/SimulatedActor.h"
+#include "Actors/TransitionActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "TestMapLevelScriptActor.h"
+#include "UI/OverlayUserWidget.h"
 
+#define CREDITS_MAP "CreditsMap"
 #define GRAVITY_SWITCH_ID "ButtonActor_1"
-#define TEST_CUBE_ID "PhysicsActor_6"
-#define TEST_BOX_ID "PhysicsActor_1"
+#define TEST_BOX_ID "SimulatedActor_1"
+#define TEST_CUBE_ID "SimulatedActor_2"
 
 ATestMapLevelScriptActor::ATestMapLevelScriptActor()
 {
@@ -25,11 +31,21 @@ void ATestMapLevelScriptActor::Tick(float DeltaTime)
 		if (IsObjectInContainer(TestCube, TestBox))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Success!"));
+
+			// Dereference objects so this function doesn't get checked anymore
+			TestCube = nullptr;
+			TestBox = nullptr;
+
+			FVector SpawnLocation = FVector(500, 0, 100);
+			FRotator SpawnRotation = FRotator(0);
+
+			Star = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);
+			
 			// TODO:
 			// Once all objects are in the container:
 			// Replace container with a new "completed" mesh
 			// Set a level specific boolean to true as one of the "checks" for finishing the level
-			// Set all pointers = nullptr so the function doesnt get called anymore (for performance purposes)
+			// Set all pointers = nullptr so the function doesnt get checked anymore
 		}
 	}
 }
@@ -38,28 +54,9 @@ void ATestMapLevelScriptActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Find SimulatedActors in the level by their ID Name and assign them to references
-	for (ASimulatedActor* SimulatedActor : SimulatedActorArray)
-	{
-		if (SimulatedActor->GetName() == TEST_CUBE_ID)
-		{
-			TestCube = SimulatedActor;
-		}
-
-		if (SimulatedActor->GetName() == TEST_BOX_ID)
-		{
-			TestBox = SimulatedActor;
-		}
-	}
-
-	// Find ButtonActors in the level by their ID Name and assign them to references
-	for (AButtonActor* ButtonActor : ButtonActorArray)
-	{
-		if (ButtonActor->GetName() == GRAVITY_SWITCH_ID)
-		{
-			GravitySwitch = ButtonActor;
-		}
-	}
+	// Find all unique actors within the level
+	FindSimulatedActors(SimulatedActorArray);
+	FindButtonActors(ButtonActorArray);
 
 	// Set GravitySwitch to active
 	if (GravitySwitch)
@@ -77,4 +74,52 @@ void ATestMapLevelScriptActor::ButtonPressed(AButtonActor* const Button)
 		Button->FlipSwitch(Button->bIsActive);
 		SetGravity(Button->bIsActive);
 	}
+}
+
+void ATestMapLevelScriptActor::EndLevel(ATransitionActor* const Actor)
+{
+	if (Actor == Star)
+	{
+		// Play the overlay transition animation
+		if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		{
+			PC->StartOverlayTransition();
+		}
+
+		// Set a timer to change the map after the transition animation completes
+		FTimerHandle TransitionTimer;
+		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, this, &ATestMapLevelScriptActor::NextLevel, 1.0f, false);
+	}
+}
+
+void ATestMapLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& ButtonActors)
+{
+	for (AButtonActor* ButtonActor : ButtonActorArray)
+	{
+		if (ButtonActor->GetName() == GRAVITY_SWITCH_ID)
+		{
+			GravitySwitch = ButtonActor;
+		}
+	}
+}
+
+void ATestMapLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors)
+{
+	for (ASimulatedActor* SimulatedActor : SimulatedActorArray)
+	{
+		if (SimulatedActor->GetName() == TEST_CUBE_ID)
+		{
+			TestCube = SimulatedActor;
+		}
+
+		if (SimulatedActor->GetName() == TEST_BOX_ID)
+		{
+			TestBox = SimulatedActor;
+		}
+	}
+}
+
+void ATestMapLevelScriptActor::NextLevel()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), CREDITS_MAP);
 }

@@ -8,7 +8,6 @@
 
 class AActor;
 class AButtonActor;
-class AFloatingActor;
 class ASimulatedActor;
 
 /**
@@ -22,6 +21,11 @@ class PROJECT_API ADefaultLevelScriptActor : public ALevelScriptActor
 public:
 	ADefaultLevelScriptActor();
 
+protected:
+	/** Called when the game starts or when spawned */
+	virtual void BeginPlay() override;
+
+public:
 	/** Array of all Actors in the level */
 	UPROPERTY()
 	TArray<AActor*> ActorArray;
@@ -30,14 +34,10 @@ public:
 	UPROPERTY()
 	TArray<AButtonActor*> ButtonActorArray;
 
-	/** Array of all FloatingActors in the level */
-	UPROPERTY()
-	TArray<AFloatingActor*> FloatingActorArray;
-
 	/** Array of all SimulatedActors in the level */
 	UPROPERTY()
 	TArray<ASimulatedActor*> SimulatedActorArray;
-
+	
 	/**
 	 * Called to determine whether an object is inside of a container
 	 * 
@@ -45,7 +45,7 @@ public:
 	 * @param	Container		specifies the contianer which holds the object
 	 */
 	UFUNCTION()
-	bool IsObjectInContainer(ASimulatedActor* Object, ASimulatedActor* Container);
+	bool IsObjectInContainer(ASimulatedActor* const Object, ASimulatedActor* const Container);
 
 	/**
 	 * Called to set whether or not the player character and all SimulatedActors in the level are affected by gravity
@@ -55,7 +55,11 @@ public:
 	UFUNCTION()
 	void SetGravity(const bool bEnabled);
 
-protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
+	/**
+	 * Called to sort all Actors into their respective subclass arrays
+	 *
+	 * @param	Actors		specifies the array of all Actors
+	 */
+	UFUNCTION()
+	void SortActors(const TArray<AActor*>& Actors);
 };

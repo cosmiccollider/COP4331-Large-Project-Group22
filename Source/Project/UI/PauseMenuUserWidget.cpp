@@ -2,10 +2,11 @@
 
 
 #include "PauseMenuUserWidget.h"
-#include "Components/Button.h"
 #include "Actors/DefaultCharacter.h"
+#include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "UI/OverlayUserWidget.h"
 
 #define MAIN_MENU_MAP "MainMenuMap"
 
@@ -59,16 +60,48 @@ void UPauseMenuUserWidget::Resume()
 
 void UPauseMenuUserWidget::Restart()
 {
-	Resume();
-	UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
+	StartTransition(EPauseMenuButton::Restart);
 }
 
 void UPauseMenuUserWidget::MainMenu()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), MAIN_MENU_MAP);
+	StartTransition(EPauseMenuButton::MainMenu);
 }
 
 void UPauseMenuUserWidget::Desktop()
 {
-	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, false);
+	StartTransition(EPauseMenuButton::Desktop);
+}
+
+void UPauseMenuUserWidget::StartTransition(const EPauseMenuButton Button)
+{
+	// Play the overlay transition animation
+	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		PC->StartOverlayTransition();
+	}
+
+	// Unpause the game to allow a timer to start counting
+	Resume();
+	
+	// Set a timer to change the map after the transition animation completes
+	FTimerHandle TransitionTimer;
+	FTimerDelegate MapTransition = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
+	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, MapTransition, 1.0f, false);
+}
+
+void UPauseMenuUserWidget::ChangeLevel(const EPauseMenuButton Button)
+{
+	if (Button == EPauseMenuButton::Restart)
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*UGameplayStatics::GetCurrentLevelName(GetWorld())));
+	}
+	else if (Button == EPauseMenuButton::MainMenu)
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), MAIN_MENU_MAP);
+	}
+	else if (Button == EPauseMenuButton::Desktop)
+	{
+		UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, false);
+	}
 }

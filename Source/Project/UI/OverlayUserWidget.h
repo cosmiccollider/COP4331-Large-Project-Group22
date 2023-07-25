@@ -22,6 +22,7 @@ public:
 	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
 
+public:
 	/** Stores the FPSText for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* FPSText;
@@ -67,9 +68,9 @@ public:
 	UImage* ReticleImage;
 
 	/**
-	 * Called to show or hide the reticle
+	 * Called to show or hide the reticle image
 	 *
-	 * @param	bVisible	specify true to show reticle
+	 * @param	bVisible	specify true to show reticle image
 	 */
 	UFUNCTION()
 	void ShowReticle(const bool bVisible);
@@ -85,4 +86,28 @@ public:
 	/** Returns the ReticleImage for this widget */
 	UFUNCTION()
 	UImage* GetReticle() const { return ReticleImage; };
+
+	/** Stores the TransitionImage for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UImage* TransitionImage;
+
+	/**
+	 * Called to play the transition animation
+	 *
+	 * @param	PlayMode	specifies the playback mode
+	 */
+	UFUNCTION()
+	void PlayTransitionAnimation(const EUMGSequencePlayMode::Type PlayMode);
+
+	/**
+	 * Called to show or hide the transition image
+	 *
+	 * @param	bVisible	specify true to show transition image
+	 */
+	UFUNCTION()
+	void ShowTransition(const bool bVisible);
+
+	/** Stores the transition animation for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* TransitionAnimation;
 };
