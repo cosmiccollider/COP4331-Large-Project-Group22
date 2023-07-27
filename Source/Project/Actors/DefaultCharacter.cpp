@@ -10,6 +10,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetSwitcher.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -275,18 +276,14 @@ void ADefaultCharacter::Pause()
 	}
 	else if (PauseMenu)
 	{
-		// Remove Pause Menu from the screen
-		PauseMenu->RemoveFromParent();
-		PauseMenu = nullptr;
-
-		// Set input mode to Game and hide the mouse cursor
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->SetShowMouseCursor(false);
-
-		// Set game to unpaused
-		UGameplayStatics::SetGamePaused(GetWorld(), false);
-		bInPauseMenu = false;
+		if (PauseMenu->WidgetSwitcher->GetActiveWidgetIndex() == 0)
+		{
+			PauseMenu->Resume();
+		}
+		else if (PauseMenu->WidgetSwitcher->GetActiveWidgetIndex() == 1)
+		{
+			PauseMenu->Back();
+		}
 	}
 }
 
@@ -330,10 +327,10 @@ void ADefaultCharacter::EndLevel(FHitResult& OutHit)
 	{
 		ATransitionActor* Actor = Cast<ATransitionActor>(OutHit.GetActor());
 
-		// Determine which level script is currently active and call the relative function for that level
-		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetLevel()->GetLevelScriptActor()))
+		// Call the function in DefaultLevelScriptActor that handles ending the level
+		if (ADefaultLevelScriptActor* DefaultLevelScript = Cast<ADefaultLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
 		{
-			TestMapLevelScript->EndLevel(Actor);
+			DefaultLevelScript->EndLevel(Actor);
 		}
 	}
 }
@@ -346,7 +343,7 @@ void ADefaultCharacter::PressButton(FHitResult& OutHit)
 		AButtonActor* Button = Cast<AButtonActor>(OutHit.GetActor());
 
 		// Determine which level script is currently active and call the relative function for that level
-		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetLevel()->GetLevelScriptActor()))
+		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
 		{
 			TestMapLevelScript->ButtonPressed(Button);
 		}

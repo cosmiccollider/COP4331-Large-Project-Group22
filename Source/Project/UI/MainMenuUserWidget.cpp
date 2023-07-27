@@ -14,10 +14,25 @@ void UMainMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Play the animation to open the main menu
+	UUserWidget::PlayAnimationForward(MainMenuPanelAnimation);
+
 	// Bind PlayButton to Play() function
 	if (PlayButton)
 	{
 		PlayButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Play);
+	}
+
+	// Bind SettingsButton to Settings() function
+	if (SettingsButton)
+	{
+		SettingsButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Settings);
+	}
+
+	// Bind BackButton to Back() function
+	if (BackButton)
+	{
+		BackButton->OnClicked.AddDynamic(this, &UMainMenuUserWidget::Back);
 	}
 
 	// Bind QuitButton to Quit() function
@@ -29,15 +44,25 @@ void UMainMenuUserWidget::NativeConstruct()
 
 void UMainMenuUserWidget::Play()
 {
-	StartTransition(EMainMenuButton::Play);
+	StartLevelTransition(EMainMenuButton::Play);
+}
+
+void UMainMenuUserWidget::Settings()
+{
+	StartPanelTransition(EMainMenuButton::Settings);
+}
+
+void UMainMenuUserWidget::Back()
+{
+	StartPanelTransition(EMainMenuButton::Back);
 }
 
 void UMainMenuUserWidget::Quit()
 {
-	StartTransition(EMainMenuButton::Quit);
+	StartLevelTransition(EMainMenuButton::Quit);
 }
 
-void UMainMenuUserWidget::StartTransition(const EMainMenuButton Button)
+void UMainMenuUserWidget::StartLevelTransition(const EMainMenuButton Button)
 {
 	// Play the overlay transition animation
 	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
@@ -47,8 +72,26 @@ void UMainMenuUserWidget::StartTransition(const EMainMenuButton Button)
 
 	// Set a timer to change the map after the transition animation completes
 	FTimerHandle TransitionTimer;
-	FTimerDelegate MapTransition = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
-	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, MapTransition, 1.0f, false);
+	FTimerDelegate ChangeLevel = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
+	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, ChangeLevel, 1.0f, false);
+}
+
+void UMainMenuUserWidget::StartPanelTransition(const EMainMenuButton Button)
+{
+	// Play the panel animation based on the button that was pressed
+	if (Button == EMainMenuButton::Play || Button == EMainMenuButton::Settings)
+	{
+		UUserWidget::PlayAnimationReverse(MainMenuPanelAnimation);
+	}
+	else if (Button == EMainMenuButton::Back)
+	{
+		UUserWidget::PlayAnimationReverse(SettingsPanelAnimation);
+	}
+
+	// Set a timer to change the panel after the animation completes
+	FTimerHandle PanelTimer;
+	FTimerDelegate ChangePanel = FTimerDelegate::CreateUFunction(this, FName("ChangePanel"), Button);
+	GetWorld()->GetTimerManager().SetTimer(PanelTimer, ChangePanel, 1.0f, false);
 }
 
 void UMainMenuUserWidget::ChangeLevel(const EMainMenuButton Button)
@@ -63,5 +106,19 @@ void UMainMenuUserWidget::ChangeLevel(const EMainMenuButton Button)
 	else if (Button == EMainMenuButton::Quit)
 	{
 		UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, false);
+	}
+}
+
+void UMainMenuUserWidget::ChangePanel(const EMainMenuButton Button)
+{
+	if (Button == EMainMenuButton::Settings)
+	{
+		UMenuUserWidget::Settings();
+		UUserWidget::PlayAnimationForward(SettingsPanelAnimation);
+	}
+	else if (Button == EMainMenuButton::Back)
+	{
+		UMenuUserWidget::Back();
+		UUserWidget::PlayAnimationForward(MainMenuPanelAnimation);
 	}
 }

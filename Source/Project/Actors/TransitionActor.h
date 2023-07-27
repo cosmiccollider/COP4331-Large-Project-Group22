@@ -23,9 +23,9 @@ public:
 public:
 	/** Specifies the speed at which the actor floats up and down */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionActor")
-		float FloatSpeed = 20.f;
+	float FloatSpeed = 20.f;
 
 	/** Specifies the speed at which the actor rotates in degrees */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TransitionActor")
-		float RotationSpeed = 20.f;
+	float RotationSpeed = 20.f;
 };

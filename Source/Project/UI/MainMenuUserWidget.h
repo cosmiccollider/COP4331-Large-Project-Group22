@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SettingsMenuUserWidget.h"
+#include "UI/MenuUserWidget.h"
 #include "MainMenuUserWidget.generated.h"
 
 class UButton;
@@ -12,6 +12,8 @@ UENUM()
 enum class EMainMenuButton : uint8
 {
 	Play,
+	Settings,
+	Back,
 	Quit
 };
 
@@ -19,13 +21,22 @@ enum class EMainMenuButton : uint8
  * MainMenuUserWidget provides a user interface for use on the MainMenuMap
  */
 UCLASS()
-class PROJECT_API UMainMenuUserWidget : public USettingsMenuUserWidget
+class PROJECT_API UMainMenuUserWidget : public UMenuUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	/** Called to navigate back to the pause menu panel */
+	UFUNCTION()
+	void Back() override;
+
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void NativeConstruct() override;
+
+	/** Called to navigate to the settings menu panel */
+	UFUNCTION()
+	void Settings() override;
 
 protected:
 	/** Stores the PlayButton for this widget */
@@ -50,8 +61,16 @@ protected:
 	 * @param	Button		specifies which button type was pressed
 	 */
 	UFUNCTION()
-	void StartTransition(const EMainMenuButton Button);
+	void StartLevelTransition(const EMainMenuButton Button);
 	
+	/**
+	 * Called to trigger the panel switch animation and change the panel
+	 *
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void StartPanelTransition(const EMainMenuButton Button);
+
 	/**
 	 * Called to trigger a level change based on the button pressed
 	 *
@@ -59,4 +78,16 @@ protected:
 	 */
 	UFUNCTION()
 	void ChangeLevel(const EMainMenuButton Button);
+
+	/**
+	 * Called to trigger a panel change based on the button pressed
+	 *
+	 * @param	Button		specifies which button type was pressed
+	 */
+	UFUNCTION()
+	void ChangePanel(const EMainMenuButton Button);
+
+	/** Stores the settings panel animation for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* MainMenuPanelAnimation;
 };

@@ -6,12 +6,10 @@
 ATransitionActor::ATransitionActor()
 {
 	// Set the default static mesh to a gold star
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> StarFinder(TEXT("/Game/Props/Star.Star"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance> GoldFinder(TEXT("/Game/Materials/MI_Gold.MI_Gold"));
-	if (StarFinder.Succeeded() && GoldFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> StarFinder(TEXT("/Game/Props/SM_Star.SM_Star"));
+	if (StarFinder.Succeeded())
 	{
 		StaticMeshComponent->SetStaticMesh(StarFinder.Object);
-		StaticMeshComponent->SetMaterial(0, GoldFinder.Object);
 	}
 }
 

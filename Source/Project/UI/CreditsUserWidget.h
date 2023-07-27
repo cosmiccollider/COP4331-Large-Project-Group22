@@ -29,10 +29,14 @@ protected:
 	/** Called to exit the credits to the main menu */
 	UFUNCTION()
 	void Exit();
+	
+	/** Stores the SecretButton for this widget */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UButton* SecretButton;
 
-	/** Called to transition into the Exit() function */
+	/** Called to exit the credits to the main menu */
 	UFUNCTION()
-	void ExitTransition();
+	void Secret();
 
 	/** Called to play the exit animation */
 	UFUNCTION()

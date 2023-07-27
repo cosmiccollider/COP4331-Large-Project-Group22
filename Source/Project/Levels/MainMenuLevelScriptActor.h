@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/LevelScriptActor.h"
+#include "Levels/DefaultLevelScriptActor.h"
 #include "MainMenuLevelScriptActor.generated.h"
 
 class UMainMenuUserWidget;
@@ -12,7 +12,7 @@ class UMainMenuUserWidget;
  * MainMenuLevelScriptActor provides the level specific capabilities of the MainMenuMap.
  */
 UCLASS()
-class PROJECT_API AMainMenuLevelScriptActor : public ALevelScriptActor
+class PROJECT_API AMainMenuLevelScriptActor : public ADefaultLevelScriptActor
 {
 	GENERATED_BODY()
 	

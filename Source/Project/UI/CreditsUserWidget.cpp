@@ -2,12 +2,9 @@
 
 
 #include "UI/CreditsUserWidget.h"
-#include "Actors/DefaultCharacter.h"
 #include "Components/Button.h"
-#include "Kismet/GameplayStatics.h"
+#include "Levels/DefaultLevelScriptActor.h"
 #include "UI/OverlayUserWidget.h"
-
-#define MAIN_MENU_MAP "MainMenuMap"
 
 void UCreditsUserWidget::NativeConstruct()
 {
@@ -15,32 +12,36 @@ void UCreditsUserWidget::NativeConstruct()
 
 	if (ExitButton)
 	{
-		// Bind ExitButton to ExitTransition() function and initialize it as hidden
-		ExitButton->OnClicked.AddDynamic(this, &UCreditsUserWidget::ExitTransition);
+		// Bind ExitButton to Exit() function and initialize it as hidden
+		ExitButton->OnClicked.AddDynamic(this, &UCreditsUserWidget::Exit);
 		ExitButton->SetVisibility(ESlateVisibility::Hidden);
 
 		// Call ExitAnimation to play after 5 seconds to reveal ExitButton
 		FTimerHandle AnimationTimer;
 		GetWorld()->GetTimerManager().SetTimer(AnimationTimer, this, &UCreditsUserWidget::PlayExitAnimation, 5.0f, false);
 	}
+
+	// Bind SecretButton to Secret() function
+	if (SecretButton)
+	{
+		SecretButton->OnClicked.AddDynamic(this, &UCreditsUserWidget::Secret);
+	}
 }
 
 void UCreditsUserWidget::Exit()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), MAIN_MENU_MAP);
+	if (ADefaultLevelScriptActor* DefaultLevelScript = Cast<ADefaultLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+	{
+		DefaultLevelScript->EndLevel(nullptr, ENextLevel::Default);
+	}
 }
 
-void UCreditsUserWidget::ExitTransition()
+void UCreditsUserWidget::Secret()
 {
-	// Play the overlay transition animation
-	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	if (ADefaultLevelScriptActor* DefaultLevelScript = Cast<ADefaultLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
 	{
-		PC->StartOverlayTransition();
+		DefaultLevelScript->EndLevel(nullptr, ENextLevel::Secret);
 	}
-
-	// Set a timer to change the map after the transition animation completes
-	FTimerHandle TransitionTimer;
-	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, this, &UCreditsUserWidget::Exit, 1.0f, false);
 }
 
 void UCreditsUserWidget::PlayExitAnimation()

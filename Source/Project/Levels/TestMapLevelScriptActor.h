@@ -8,7 +8,6 @@
 
 class AButtonActor;
 class ASimulatedActor;
-class ATransitionActor;
 
 /**
  * TestMapLevelScriptActor provides the level specific capabilities of the TestMap.
@@ -41,10 +40,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ASimulatedActor* TestBox;
 
-	/** Stores the GravitySwitch for this level */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ATransitionActor* Star;
-
 	/**
 	 * Triggers an event within the level based on the button that was pressed
 	 *
@@ -52,14 +47,6 @@ public:
 	 */
 	UFUNCTION()
 	void ButtonPressed(AButtonActor* const Button);
-
-	/**
-	 * Called to start the ending process for the current level upon clicking an actor
-	 *
-	 * @param	Actor		specifies the TransitionActor that ends the level
-	 */
-	UFUNCTION()
-	void EndLevel(ATransitionActor* const Actor);
 
 	/**
 	 * Finds all unique ButtonActors based on defined actor ID names
@@ -76,7 +63,4 @@ public:
 	 */
 	UFUNCTION()
 	void FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors);
-
-	/** Called to open the next level */
-	void NextLevel();
 };

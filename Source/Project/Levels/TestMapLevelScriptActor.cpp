@@ -7,10 +7,8 @@
 #include "Actors/SimulatedActor.h"
 #include "Actors/TransitionActor.h"
 #include "Kismet/GameplayStatics.h"
-#include "TestMapLevelScriptActor.h"
 #include "UI/OverlayUserWidget.h"
 
-#define CREDITS_MAP "CreditsMap"
 #define GRAVITY_SWITCH_ID "ButtonActor_1"
 #define TEST_BOX_ID "SimulatedActor_1"
 #define TEST_CUBE_ID "SimulatedActor_2"
@@ -39,7 +37,7 @@ void ATestMapLevelScriptActor::Tick(float DeltaTime)
 			FVector SpawnLocation = FVector(500, 0, 100);
 			FRotator SpawnRotation = FRotator(0);
 
-			Star = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);
+			TransitionActor = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);
 			
 			// TODO:
 			// Once all objects are in the container:
@@ -76,22 +74,6 @@ void ATestMapLevelScriptActor::ButtonPressed(AButtonActor* const Button)
 	}
 }
 
-void ATestMapLevelScriptActor::EndLevel(ATransitionActor* const Actor)
-{
-	if (Actor == Star)
-	{
-		// Play the overlay transition animation
-		if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
-		{
-			PC->StartOverlayTransition();
-		}
-
-		// Set a timer to change the map after the transition animation completes
-		FTimerHandle TransitionTimer;
-		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, this, &ATestMapLevelScriptActor::NextLevel, 1.0f, false);
-	}
-}
-
 void ATestMapLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& ButtonActors)
 {
 	for (AButtonActor* ButtonActor : ButtonActorArray)
@@ -117,9 +99,4 @@ void ATestMapLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*
 			TestBox = SimulatedActor;
 		}
 	}
-}
-
-void ATestMapLevelScriptActor::NextLevel()
-{
-	UGameplayStatics::OpenLevel(GetWorld(), CREDITS_MAP);
 }

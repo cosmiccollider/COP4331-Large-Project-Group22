@@ -9,6 +9,14 @@
 class AActor;
 class AButtonActor;
 class ASimulatedActor;
+class ATransitionActor;
+
+UENUM()
+enum class ENextLevel : uint8
+{
+	Default,
+	Secret
+};
 
 /**
  * DefaultLevelScriptActor provides a base class derived from LevelScriptActor which we can make specific level scripts from.
@@ -26,17 +34,30 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	/** Array of all Actors in the level */
+	/** Array of all Actors in the current level */
 	UPROPERTY()
 	TArray<AActor*> ActorArray;
 
-	/** Array of all ButtonActors in the level */
+	/** Array of all ButtonActors in the current level */
 	UPROPERTY()
 	TArray<AButtonActor*> ButtonActorArray;
 
-	/** Array of all SimulatedActors in the level */
+	/** Array of all SimulatedActors in the current level */
 	UPROPERTY()
 	TArray<ASimulatedActor*> SimulatedActorArray;
+
+	/** Stores the TransitionActor for the current level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ATransitionActor* TransitionActor;
+
+	/**
+	 * Called to start the ending process for the current level upon clicking an actor
+	 *
+	 * @param	Actor		specifies the TransitionActor that ends the level
+	 * @param	Level		specifies if the next level should be the default level or a special level
+	 */
+	UFUNCTION()
+	void EndLevel(ATransitionActor* const Actor, const ENextLevel Level = ENextLevel::Default);
 	
 	/**
 	 * Called to determine whether an object is inside of a container
@@ -46,6 +67,14 @@ public:
 	 */
 	UFUNCTION()
 	bool IsObjectInContainer(ASimulatedActor* const Object, ASimulatedActor* const Container);
+
+	/**
+	 * Called to open the next level
+	 *
+	 * @param	Level		specifies if the next level should be the default level or a special level
+	 */
+	UFUNCTION()
+	void NextLevel(const ENextLevel Level = ENextLevel::Default);
 
 	/**
 	 * Called to set whether or not the player character and all SimulatedActors in the level are affected by gravity

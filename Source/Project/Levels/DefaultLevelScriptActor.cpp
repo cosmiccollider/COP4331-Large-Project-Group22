@@ -9,6 +9,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
+#define CREDITS_MAP "CreditsMap"
+#define MAIN_MENU_MAP "MainMenuMap"
+#define TEST_MAP "TestMap"
+
 ADefaultLevelScriptActor::ADefaultLevelScriptActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,6 +27,26 @@ void ADefaultLevelScriptActor::BeginPlay()
 	SortActors(ActorArray);
 }
 
+void ADefaultLevelScriptActor::EndLevel(ATransitionActor* const Actor, const ENextLevel Level)
+{
+	// For normal levels, we ensure that the Actor being passed is actually the TransitionActor
+	// For levels where a TransitionActor is not spawned, simply proceed
+	if (Actor == TransitionActor
+	|| UGameplayStatics::GetCurrentLevelName(GetWorld()) == CREDITS_MAP)
+	{
+		// Play the overlay transition animation
+		if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		{
+			PC->StartOverlayTransition();
+		}
+
+		// Set a timer to open the next level after the transition animation completes
+		FTimerHandle TransitionTimer;
+		FTimerDelegate NextLevel = FTimerDelegate::CreateUFunction(this, FName("NextLevel"), Level);
+		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, NextLevel, 1.0f, false);
+	}
+}
+
 bool ADefaultLevelScriptActor::IsObjectInContainer(ASimulatedActor* const Object, ASimulatedActor* const Container)
 {
 	FVector ObjectOrigin = Object->GetActorLocation();
@@ -32,6 +56,30 @@ bool ADefaultLevelScriptActor::IsObjectInContainer(ASimulatedActor* const Object
 	Container->GetActorBounds(false, ContainerOrigin, ContainerBoxExtent);
 
 	return UKismetMathLibrary::IsPointInBox(ObjectOrigin, ContainerOrigin, ContainerBoxExtent);
+}
+
+void ADefaultLevelScriptActor::NextLevel(const ENextLevel Level)
+{
+	if (Level == ENextLevel::Secret)
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), TEST_MAP);
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+	}
+	else
+	{
+		FString CurrentLevel = UGameplayStatics::GetCurrentLevelName(GetWorld());
+		
+		if (CurrentLevel == TEST_MAP)
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), CREDITS_MAP);
+		}
+		else if (CurrentLevel == CREDITS_MAP)
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), MAIN_MENU_MAP);
+		}
+	}
 }
 
 void ADefaultLevelScriptActor::SetGravity(const bool bEnabled)

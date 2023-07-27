@@ -2,8 +2,10 @@
 
 
 #include "Levels/CreditsLevelScriptActor.h"
+#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/CreditsUserWidget.h"
+#include "UObject/ConstructorHelpers.h"
 
 ACreditsLevelScriptActor::ACreditsLevelScriptActor()
 {

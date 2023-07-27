@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/LevelScriptActor.h"
+#include "Levels/DefaultLevelScriptActor.h"
 #include "CreditsLevelScriptActor.generated.h"
 
 class UCreditsUserWidget;
@@ -12,7 +12,7 @@ class UCreditsUserWidget;
  * CreditsLevelScriptActor provides the level specific capabilities of the CreditsMap.
  */
 UCLASS()
-class PROJECT_API ACreditsLevelScriptActor : public ALevelScriptActor
+class PROJECT_API ACreditsLevelScriptActor : public ADefaultLevelScriptActor
 {
 	GENERATED_BODY()
 	
