@@ -30,4 +30,44 @@ void ADefaultActor::Tick(float DeltaTime)
 void ADefaultActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Set the material to a dynamic instance of itself
+	DynamicMaterial = UMaterialInstanceDynamic::Create(StaticMeshComponent->GetMaterial(0), this);
+	StaticMeshComponent->SetMaterial(0, DynamicMaterial);
+}
+
+void ADefaultActor::SetBaseColor(const FLinearColor Color)
+{
+	DynamicMaterial->SetVectorParameterValue(TEXT("Base Color"), Color);
+}
+
+void ADefaultActor::SetGlow(const float Value)
+{
+	DynamicMaterial->SetScalarParameterValue(TEXT("Glow"), Value);
+}
+
+void ADefaultActor::StartBlinking(const float InRate, const float Value)
+{
+	FTimerDelegate BlinkFunction = FTimerDelegate::CreateUFunction(this, FName("Blink"), Value);
+	GetWorld()->GetTimerManager().SetTimer(BlinkTimer, BlinkFunction, InRate, true);
+}
+
+void ADefaultActor::Blink(const float Value)
+{
+	float Glow;
+	DynamicMaterial->GetScalarParameterValue(TEXT("Glow"), Glow);
+
+	if (Glow != 0.0f)
+	{
+		SetGlow(0.0f);
+	}
+	else
+	{
+		SetGlow(Value);
+	}
+}
+
+void ADefaultActor::StopBlinking()
+{
+	GetWorld()->GetTimerManager().ClearTimer(BlinkTimer);
 }

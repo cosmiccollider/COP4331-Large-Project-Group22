@@ -8,6 +8,7 @@
 #include "Actors/TransitionActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/OverlayUserWidget.h"
+#include "TestMapLevelScriptActor.h"
 
 #define GRAVITY_SWITCH_ID "ButtonActor_1"
 #define TEST_BOX_ID "SimulatedActor_1"
@@ -64,7 +65,7 @@ void ATestMapLevelScriptActor::BeginPlay()
 	}
 }
 
-void ATestMapLevelScriptActor::ButtonPressed(AButtonActor* const Button)
+void ATestMapLevelScriptActor::ButtonTriggered(AButtonActor* const Button)
 {
 	if (Button == GravitySwitch)
 	{

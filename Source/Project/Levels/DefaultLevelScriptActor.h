@@ -63,7 +63,7 @@ public:
 	 * Called to determine whether an object is inside of a container
 	 * 
 	 * @param	Object			specifies the object which goes inside the container
-	 * @param	Container		specifies the contianer which holds the object
+	 * @param	Container		specifies the container which holds the object
 	 */
 	UFUNCTION()
 	bool IsObjectInContainer(ASimulatedActor* const Object, ASimulatedActor* const Container);

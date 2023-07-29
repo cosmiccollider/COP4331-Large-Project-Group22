@@ -46,7 +46,7 @@ public:
 	 * @param	Button		specifies the specific button that was pressed
 	 */
 	UFUNCTION()
-	void ButtonPressed(AButtonActor* const Button);
+	void ButtonTriggered(AButtonActor* const Button);
 
 	/**
 	 * Finds all unique ButtonActors based on defined actor ID names

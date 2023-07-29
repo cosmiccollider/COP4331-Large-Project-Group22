@@ -4,6 +4,7 @@
 #include "DefaultCharacter.h"
 #include "Actors/ButtonActor.h"
 #include "Actors/DefaultActor.h"
+#include "Actors/MemoryGameActor.h"
 #include "Actors/SimulatedActor.h"
 #include "Actors/TransitionActor.h"
 #include "Blueprint/UserWidget.h"
@@ -292,7 +293,8 @@ void ADefaultCharacter::StartPrimary()
 	FHitResult OutHit;
 
 	EndLevel(OutHit);
-	PressButton(OutHit);
+	TriggerButton(OutHit);
+	TriggerMemoryGame(OutHit);
 	StartGrab(OutHit);
 }
 
@@ -335,7 +337,7 @@ void ADefaultCharacter::EndLevel(FHitResult& OutHit)
 	}
 }
 
-void ADefaultCharacter::PressButton(FHitResult& OutHit)
+void ADefaultCharacter::TriggerButton(FHitResult& OutHit)
 {
 	// Check that the actor in front of the player is a ButtonActor
 	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == AButtonActor::StaticClass())
@@ -345,7 +347,22 @@ void ADefaultCharacter::PressButton(FHitResult& OutHit)
 		// Determine which level script is currently active and call the relative function for that level
 		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
 		{
-			TestMapLevelScript->ButtonPressed(Button);
+			TestMapLevelScript->ButtonTriggered(Button);
+		}
+	}
+}
+
+void ADefaultCharacter::TriggerMemoryGame(FHitResult& OutHit)
+{
+	// Check that the actor in front of the player is a MemoryGameActor
+	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == AMemoryGameActor::StaticClass())
+	{
+		AMemoryGameActor* MemoryGameActor = Cast<AMemoryGameActor>(OutHit.GetActor());
+		
+		// Check that the actor is not currently in an animation
+		if (!MemoryGameActor->bActiveAnimation)
+		{
+			MemoryGameActor->MemoryGameTriggered();
 		}
 	}
 }

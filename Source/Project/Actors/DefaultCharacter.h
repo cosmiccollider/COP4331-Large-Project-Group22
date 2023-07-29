@@ -185,7 +185,15 @@ protected:
 	 * @param	OutHit		specifies a hit result from a line trace
 	 */
 	UFUNCTION()
-	void PressButton(FHitResult& OutHit);
+	void TriggerButton(FHitResult& OutHit);
+
+	/**
+	 * Allows this character to trigger MemoryGameActor events within a level
+	 *
+	 * @param	OutHit		specifies a hit result from a line trace
+	 */
+	UFUNCTION()
+	void TriggerMemoryGame(FHitResult& OutHit);
 
 	/** Determines whether the player is currently grabbing an actor */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
