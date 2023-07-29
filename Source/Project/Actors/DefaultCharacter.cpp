@@ -382,7 +382,7 @@ void ADefaultCharacter::SetGravity(const bool bEnabled)
 void ADefaultCharacter::StartGrab(FHitResult& OutHit)
 {
 	// Check that the actor in front of the player is a SimulatedActor
-	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == ASimulatedActor::StaticClass())
+	if (CanLineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ASimulatedActor::StaticClass()))
 	{
 		// Initialize a zeroed FRotator and grab the hit result with that rotation
 		// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0

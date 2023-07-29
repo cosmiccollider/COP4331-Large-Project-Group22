@@ -39,11 +39,8 @@ protected:
 	/** Determines whether a game is currently in progress or not */
 	bool bGameActive = false;
 
-	/** Stores the index for the current pattern, until a continue event is reached */
-	int32 CurrentPatternIndex = 0;
-
 	/** Stores the index at which a continue event will be triggered */
-	int32 CurrentContinueIndex = 0;
+	int32 ContinueIndex = 0;
 
 	/** Stores the current player patern, until a continue event is reached */
 	TArray<int32> PlayerPattern;
@@ -87,9 +84,13 @@ protected:
 	UFUNCTION()
 	void SelectAnimation();
 	
-	/** Called to play the continue animation for each actor in the correct pattern */
+	/**
+	 * Called to play the continue animation for each actor in the correct pattern
+	 *
+	 * @param	ActorIndex		specifies the current actor to play the animation for in the recursive loop
+	 */
 	UFUNCTION()
-	void ContinueAnimation(int32 ContinueIndex);
+	void ContinueAnimation(int32 ActorIndex);
 
 	/** Called to play the win animation for all actors */
 	UFUNCTION()
@@ -99,11 +100,19 @@ protected:
 	UFUNCTION()
 	void LoseAnimation();
 
-	/** Called to clear any animations on one or all actors */
+	/**
+	 * Called to clear any animations on one or all actors
+	 *
+	 * @param	Actors		specifies whether we are clearing just one or all of the actors
+	 */
 	UFUNCTION()
 	void ClearAnimation(const EClearTimer Actors);
 
-	/** Called to lock the player out of input while a game loop is in progress */
+	/**
+	 * Called to lock the player out of input while a game loop is in progress
+	 *
+	 * @param	bLocked		specify true to lock the player out of input
+	 */
 	UFUNCTION()
 	void LockInput(const bool bLocked);
 };

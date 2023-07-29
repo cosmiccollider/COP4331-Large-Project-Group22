@@ -5,12 +5,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
-#define END_DURATION 5.0f
-#define GLOW_INTENSITY 10.0f
 #define CONTINUE_INITIAL_GAP 2.0f
 #define CONTINUE_INTERVAL 1.0f
+#define END_DURATION 5.0f
+#define GLOW_INTENSITY 10.0f
+#define POST_SELECT_INPUT_GAP 0.6f
 #define SELECT_DURATION 0.5f
-#define PLAY_INITIAL_GAP 0.8f
 
 void AMemoryGameActor::BeginPlay()
 {
@@ -37,9 +37,6 @@ void AMemoryGameActor::MemoryGameTriggered()
 	// Create a new game if there isn't one active
 	if (!bGameActive)
 	{
-		// Clear any Animations that are currently active
-		ClearAnimation(EClearTimer::All);
-
 		// Generate a random pattern in case there isn't a custom one
 		TArray<int32> RandomPattern;
 		for (AMemoryGameActor* Actors : MemoryGameActorArray)
@@ -49,7 +46,7 @@ void AMemoryGameActor::MemoryGameTriggered()
 
 		StartMemoryGame(RandomPattern);
 
-		// Then play the pattern for the first time
+		// Play the pattern for the first time
 		FTimerHandle ContinueTimer;
 		FTimerDelegate ContinueFunction = FTimerDelegate::CreateUFunction(this, FName("ContinueAnimation"), 0);
 		GetWorld()->GetTimerManager().SetTimer(ContinueTimer, ContinueFunction, CONTINUE_INITIAL_GAP, false);
@@ -59,9 +56,9 @@ void AMemoryGameActor::MemoryGameTriggered()
 		// Play an Animation on the current actor to indicate selection
 		SelectAnimation();
 
-		// Set a timer to play the game with that actor selected after the Animation ends
+		// Set a timer to play the game after the animation ends
 		FTimerHandle PlayTimer;
-		GetWorld()->GetTimerManager().SetTimer(PlayTimer, this, &AMemoryGameActor::PlayMemoryGame, PLAY_INITIAL_GAP, false);
+		GetWorld()->GetTimerManager().SetTimer(PlayTimer, this, &AMemoryGameActor::PlayMemoryGame, POST_SELECT_INPUT_GAP, false);
 	}
 }
 
@@ -95,23 +92,21 @@ void AMemoryGameActor::PlayMemoryGame()
 		WinAnimation();
 		EndMemoryGame();
 	}
-	// If the player has caught up to the current index in the pattern, continue with the pattern
-	else if (CurrentPatternIndex == CurrentContinueIndex)
+	// If the player has caught up to the continue index, trigger a continue event
+	else if (PlayerPattern.Num() == ContinueIndex)
 	{
-		// Play the continue animation
+		// Reset the current player pattern
+		PlayerPattern.Empty();
+
+		// Play the continue animation to show the player the continuation of the pattern
 		FTimerHandle ContinueTimer;
 		FTimerDelegate ContinueFunction = FTimerDelegate::CreateUFunction(this, FName("ContinueAnimation"), 0);
 		GetWorld()->GetTimerManager().SetTimer(ContinueTimer, ContinueFunction, CONTINUE_INITIAL_GAP, false);
 
-		// Reset the current player pattern and incriment the continue index
-		PlayerPattern.Empty();
-		CurrentPatternIndex = 0;
-		CurrentContinueIndex++;
 	}
-	// Otherwise, the player is still entering the current pattern, so incriment the current pattern index
+	// Otherwise, the player is still entering the current pattern, so we unlock input so they can input the next actor
 	else
 	{
-		CurrentPatternIndex++;
 		LockInput(false);
 	}
 }
@@ -119,8 +114,7 @@ void AMemoryGameActor::PlayMemoryGame()
 void AMemoryGameActor::EndMemoryGame()
 {
 	bGameActive = false;
-	CurrentPatternIndex = 0;
-	CurrentContinueIndex = 0;
+	ContinueIndex = 0;
 	PlayerPattern.Empty();
 	CorrectPattern.Empty();
 }
@@ -131,8 +125,7 @@ void AMemoryGameActor::SyncMemoryGameActors()
 	{
 		Actors->bActiveAnimation = this->bActiveAnimation;
 		Actors->bGameActive = this->bGameActive;
-		Actors->CurrentPatternIndex = this->CurrentPatternIndex;
-		Actors->CurrentContinueIndex = this->CurrentContinueIndex;
+		Actors->ContinueIndex = this->ContinueIndex;
 		Actors->PlayerPattern = this->PlayerPattern;
 		Actors->CorrectPattern = this->CorrectPattern;
 	}
@@ -162,22 +155,31 @@ void AMemoryGameActor::SelectAnimation()
 	GetWorld()->GetTimerManager().SetTimer(ClearTimer, ClearFunction, SELECT_DURATION, false);
 }
 
-void AMemoryGameActor::ContinueAnimation(int32 ContinueIndex)
+void AMemoryGameActor::ContinueAnimation(int32 ActorIndex)
 {
-	if (ContinueIndex < CurrentContinueIndex + 1)
+	// Increment the continue index on only the first call of the recursive function
+	if (ActorIndex == 0)
 	{
-		MemoryGameActorArray[CorrectPattern[ContinueIndex]]->SelectAnimation();
+		ContinueIndex++;
+	}
+
+	// While the current actor index is less than the last continue index, recursively play the animation
+	if (ActorIndex < ContinueIndex - 1)
+	{
+		MemoryGameActorArray[CorrectPattern[ActorIndex]]->SelectAnimation();
 
 		FTimerHandle ContinueTimer;
-		FTimerDelegate ContinueFunction = FTimerDelegate::CreateUFunction(this, FName("ContinueAnimation"), ++ContinueIndex);
+		FTimerDelegate ContinueFunction = FTimerDelegate::CreateUFunction(this, FName("ContinueAnimation"), ++ActorIndex);
 		GetWorld()->GetTimerManager().SetTimer(ContinueTimer, ContinueFunction, CONTINUE_INTERVAL, false);
 	}
-	// Unlock the input only after the entire continue animation has concluded
-	else if (ContinueIndex == CurrentContinueIndex + 1)
+	// After playing the last continue animation, unlock input at a faster rate so the player can immediately submit an input after the animation
+	else if (ActorIndex < ContinueIndex)
 	{
+		MemoryGameActorArray[CorrectPattern[ActorIndex]]->SelectAnimation();
+
 		FTimerHandle LockTimer;
 		FTimerDelegate LockFunction = FTimerDelegate::CreateUFunction(this, FName("LockInput"), false);
-		GetWorld()->GetTimerManager().SetTimer(LockTimer, LockFunction, CONTINUE_INTERVAL, false);
+		GetWorld()->GetTimerManager().SetTimer(LockTimer, LockFunction, POST_SELECT_INPUT_GAP, false);
 	}
 }
 
