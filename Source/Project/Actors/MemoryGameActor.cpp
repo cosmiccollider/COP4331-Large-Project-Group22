@@ -9,6 +9,7 @@
 #define CONTINUE_INTERVAL 1.0f
 #define END_DURATION 5.0f
 #define GLOW_INTENSITY 10.0f
+#define PATTERN_LENGTH 4
 #define POST_SELECT_INPUT_GAP 0.6f
 #define SELECT_DURATION 0.5f
 
@@ -38,10 +39,10 @@ void AMemoryGameActor::MemoryGameTriggered()
 	if (!bGameActive)
 	{
 		// Generate a random pattern in case there isn't a custom one
-		TArray<int32> RandomPattern;
-		for (AMemoryGameActor* Actors : MemoryGameActorArray)
+		TArray<uint8> RandomPattern;
+		for (int i = 0; i < PATTERN_LENGTH; i++)
 		{
-			RandomPattern.Add(FMath::RandRange(0, MemoryGameActorArray.Num() - 1));
+			RandomPattern.Add(FMath::RandRange(0, MemoryGameActorArray.Num()));
 		}
 
 		StartMemoryGame(RandomPattern);
@@ -62,7 +63,7 @@ void AMemoryGameActor::MemoryGameTriggered()
 	}
 }
 
-void AMemoryGameActor::StartMemoryGame(TArray<int32> Pattern)
+void AMemoryGameActor::StartMemoryGame(TArray<uint8> Pattern)
 {
 	bGameActive = true;
 	CorrectPattern = Pattern;
@@ -155,7 +156,7 @@ void AMemoryGameActor::SelectAnimation()
 	GetWorld()->GetTimerManager().SetTimer(ClearTimer, ClearFunction, SELECT_DURATION, false);
 }
 
-void AMemoryGameActor::ContinueAnimation(int32 ActorIndex)
+void AMemoryGameActor::ContinueAnimation(uint8 ActorIndex)
 {
 	// Increment the continue index on only the first call of the recursive function
 	if (ActorIndex == 0)

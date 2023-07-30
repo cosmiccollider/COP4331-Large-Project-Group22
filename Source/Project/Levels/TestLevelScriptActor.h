@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Levels/DefaultLevelScriptActor.h"
-#include "TestMapLevelScriptActor.generated.h"
+#include "TestLevelScriptActor.generated.h"
 
 class AButtonActor;
 class ASimulatedActor;
 
 /**
- * TestMapLevelScriptActor provides the level specific capabilities of the TestMap.
+ * TestLevelScriptActor provides the level specific capabilities of the TestMap.
  */
 UCLASS()
-class PROJECT_API ATestMapLevelScriptActor : public ADefaultLevelScriptActor
+class PROJECT_API ATestLevelScriptActor : public ADefaultLevelScriptActor
 {
 	GENERATED_BODY()
 	
 public:
-	ATestMapLevelScriptActor();
+	ATestLevelScriptActor();
 
 	/** Called every frame */
 	virtual void Tick(float DeltaTime) override;

@@ -15,6 +15,7 @@ class UOverlayUserWidget;
 class UPauseMenuUserWidget;
 class UPhysicsConstraintComponent;
 class UPhysicsHandleComponent;
+class USafeUserWidget;
 
 /**
  * DefaultCharacter represents the player controlled character.
@@ -93,6 +94,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* SecondaryAction;
 
+	/** Stores the ScrollAction for this actor */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* ScrollAction;
+
 protected:
 	/** Determines whether the player is currently able to look */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -130,6 +135,10 @@ protected:
 	UFUNCTION()
 	void StopSecondary();
 
+	/** Called to trigger the scroll action */
+	UFUNCTION()
+	void Scroll(const FInputActionValue& Value);
+
 //~==================================================
 // User Widgets
 
@@ -157,6 +166,14 @@ public:
 	/** Stores the PauseMenu for this actor */
 	UPROPERTY()
 	UPauseMenuUserWidget* PauseMenu;
+
+	/** Stores the class of SafeUI */
+	UPROPERTY(VisibleAnywhere)
+	TSubclassOf<USafeUserWidget> SafeUIClass;
+
+	/** Stores the Safe UI for this actor */
+	UPROPERTY()
+	USafeUserWidget* SafeUI;
 
 //~==================================================
 // Abilities
@@ -195,6 +212,14 @@ protected:
 	UFUNCTION()
 	void TriggerMemoryGame(FHitResult& OutHit);
 
+	/**
+	 * Allows this character to trigger SafeActor events within a level
+	 *
+	 * @param	OutHit		specifies a hit result from a line trace
+	 */
+	UFUNCTION()
+	void TriggerSafe(FHitResult& OutHit);
+
 	/** Determines whether the player is currently grabbing an actor */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsGrabbing = false;
@@ -231,18 +256,30 @@ protected:
 	UFUNCTION()
 	void RotateObject();
 
+	/** Determines how far away the player holds an object that's currently being grabbed (in centimeters) */
+	UPROPERTY()
+	int32 HoldDistance = 200;
+
+	/**
+	 * Set the HoldDistance, which determines how far away the player holds an object
+	 *
+	 * @param	Direction		specifies whether to bring the object closer or push it further away (input should be -1 or 1)
+	 */
+	UFUNCTION()
+	void SetHoldDistance(const int8 Direction);
+
 //~==================================================
 // Helpers
 
 public:
 	/** Starts the transition animation for this character's overlay */
 	void StartOverlayTransition();
-
-protected:
+	
 	/** Updates the location of the mouse to be the center of the screen */
 	UFUNCTION()
 	void SetMouseCenter();
 
+protected:
 	/**
 	 * Attempts to draw a line trace from the camera to a set distance in front of the character
 	 *

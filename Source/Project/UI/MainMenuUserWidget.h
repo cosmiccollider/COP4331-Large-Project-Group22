@@ -7,6 +7,7 @@
 #include "MainMenuUserWidget.generated.h"
 
 class UButton;
+class UWidgetAnimation;
 
 UENUM()
 enum class EMainMenuButton : uint8
@@ -87,7 +88,7 @@ protected:
 	UFUNCTION()
 	void ChangePanel(const EMainMenuButton Button);
 
-	/** Stores the settings panel animation for this widget */
+	/** Stores the main menu panel animation for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* MainMenuPanelAnimation;
 };

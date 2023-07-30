@@ -2,13 +2,12 @@
 
 
 #include "UI/OverlayUserWidget.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-
-#define LOCTEXT_NAMESPACE "FPS"
 
 void UOverlayUserWidget::NativeConstruct()
 {
@@ -46,7 +45,7 @@ void UOverlayUserWidget::SetFPSText()
 	{
 		// Get the time since the last frame and update the FPS with it
 		float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
-		FPSText->SetText(FText::Format(LOCTEXT("FPS", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
+		FPSText->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
 	}
 }
 
@@ -105,11 +104,12 @@ void UOverlayUserWidget::PlayTransitionAnimation(const EUMGSequencePlayMode::Typ
 		else if (PlayMode == EUMGSequencePlayMode::Reverse)
 		{
 			UUserWidget::PlayAnimationReverse(TransitionAnimation);
+			float TransitionDuration = TransitionAnimation->GetEndTime();
 
 			// Create a timer for the transition image to be hidden after the animation is done
 			FTimerHandle TransitionTimer;
 			FTimerDelegate TransitionHidden = FTimerDelegate::CreateUFunction(this, FName("ShowTransition"), false);
-			GetWorld()->GetTimerManager().SetTimer(TransitionTimer, TransitionHidden, 1.0f, false);
+			GetWorld()->GetTimerManager().SetTimer(TransitionTimer, TransitionHidden, TransitionDuration, false);
 		}
 	}
 }

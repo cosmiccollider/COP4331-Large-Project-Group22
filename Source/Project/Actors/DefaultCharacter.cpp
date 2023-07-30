@@ -5,6 +5,7 @@
 #include "Actors/ButtonActor.h"
 #include "Actors/DefaultActor.h"
 #include "Actors/MemoryGameActor.h"
+#include "Actors/SafeActor.h"
 #include "Actors/SimulatedActor.h"
 #include "Actors/TransitionActor.h"
 #include "Blueprint/UserWidget.h"
@@ -20,15 +21,19 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Levels/TestMapLevelScriptActor.h"
+#include "Levels/HouseLevelScriptActor.h"
+#include "Levels/TestLevelScriptActor.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "UI/OverlayUserWidget.h"
+#include "UI/SafeUserWidget.h"
 #include "UI/PauseMenuUserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 #define CREDITS_MAP "CreditsMap"
-#define HOLD_DISTANCE 200
+#define HOLD_DISTANCE_MAX 500
+#define HOLD_DISTANCE_MIN 50
+#define HOLD_DISTANCE_MULTIPLIER 2000
 #define MAIN_MENU_MAP "MainMenuMap"
 #define ROTATION_SENSITIVITY 0.5f
 #define TRACE_DISTANCE 400
@@ -106,6 +111,13 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		SecondaryAction = SecondaryActionFinder.Object;
 	}
+	
+	// Set ScrollAction to IA_Scroll data asset
+	static ConstructorHelpers::FObjectFinder<UInputAction> ScrollActionFinder(TEXT("/Game/Input/Actions/IA_Scroll.IA_Scroll"));
+	if (ScrollActionFinder.Succeeded())
+	{
+		ScrollAction = ScrollActionFinder.Object;
+	}
 
 	// Set OverlayClass to OverlayWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<UOverlayUserWidget> OverlayFinder(TEXT("/Game/UI/WBP_Overlay.WBP_Overlay_C"));
@@ -119,6 +131,13 @@ ADefaultCharacter::ADefaultCharacter()
 	if (PauseMenuFinder.Succeeded())
 	{
 		PauseMenuClass = PauseMenuFinder.Class;
+	}
+
+	// Set SafeUIClass to SafeWidgetBlueprint class
+	static ConstructorHelpers::FClassFinder<USafeUserWidget> SafeUIFinder(TEXT("/Game/UI/WBP_Safe.WBP_Safe_C"));
+	if (SafeUIFinder.Succeeded())
+	{
+		SafeUIClass = SafeUIFinder.Class;
 	}
 }
 
@@ -183,6 +202,9 @@ void ADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Secondary
 		Input->BindAction(SecondaryAction, ETriggerEvent::Started, this, &ADefaultCharacter::StartSecondary);
 		Input->BindAction(SecondaryAction, ETriggerEvent::Completed, this, &ADefaultCharacter::StopSecondary);
+
+		// Scroll
+		Input->BindAction(ScrollAction, ETriggerEvent::Triggered, this, &ADefaultCharacter::Scroll);
 	}
 }
 
@@ -295,6 +317,7 @@ void ADefaultCharacter::StartPrimary()
 	EndLevel(OutHit);
 	TriggerButton(OutHit);
 	TriggerMemoryGame(OutHit);
+	TriggerSafe(OutHit);
 	StartGrab(OutHit);
 }
 
@@ -322,6 +345,17 @@ void ADefaultCharacter::StopSecondary()
 	}
 }
 
+void ADefaultCharacter::Scroll(const FInputActionValue& Value)
+{
+	// Input is a Vector
+	FVector ScrollVector = Value.Get<FVector>();
+
+	if (Controller && bIsGrabbing)
+	{
+		SetHoldDistance(ScrollVector.X);
+	}
+}
+
 void ADefaultCharacter::EndLevel(FHitResult& OutHit)
 {
 	// Check that the actor in front of the player is a TransitionActor
@@ -345,9 +379,13 @@ void ADefaultCharacter::TriggerButton(FHitResult& OutHit)
 		AButtonActor* Button = Cast<AButtonActor>(OutHit.GetActor());
 
 		// Determine which level script is currently active and call the relative function for that level
-		if (ATestMapLevelScriptActor* TestMapLevelScript = Cast<ATestMapLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+		if (ATestLevelScriptActor* TestLevelScript = Cast<ATestLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
 		{
-			TestMapLevelScript->ButtonTriggered(Button);
+			TestLevelScript->ButtonTriggered(Button);
+		}
+		else if (AHouseLevelScriptActor* HouseLevelScript = Cast<AHouseLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+		{
+			HouseLevelScript->ButtonTriggered(Button);
 		}
 	}
 }
@@ -363,6 +401,21 @@ void ADefaultCharacter::TriggerMemoryGame(FHitResult& OutHit)
 		if (!MemoryGameActor->bActiveAnimation)
 		{
 			MemoryGameActor->MemoryGameTriggered();
+		}
+	}
+}
+
+void ADefaultCharacter::TriggerSafe(FHitResult& OutHit)
+{
+	// Check that the actor in front of the player is a SafeActor
+	if (CanLineTrace(OutHit) && OutHit.GetActor()->GetClass() == ASafeActor::StaticClass())
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		ASafeActor* SafeActor = Cast<ASafeActor>(OutHit.GetActor());
+
+		if (AHouseLevelScriptActor* HouseLevelScript = Cast<AHouseLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+		{
+			HouseLevelScript->SafeTriggered(SafeActor);
 		}
 	}
 }
@@ -384,6 +437,9 @@ void ADefaultCharacter::StartGrab(FHitResult& OutHit)
 	// Check that the actor in front of the player is a SimulatedActor
 	if (CanLineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ASimulatedActor::StaticClass()))
 	{
+		// Reset the HoldDistance to 200
+		HoldDistance = 200;
+
 		// Initialize a zeroed FRotator and grab the hit result with that rotation
 		// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0
 		// If it isn't initilized at 0, the rotation will be offset when starting to rotating, since rotating operates on a delta with the center of the screen
@@ -402,8 +458,8 @@ void ADefaultCharacter::StopGrab()
 void ADefaultCharacter::MoveObject()
 {
 	// Get location as a distance from the camera based on current rotation
-	FVector HoldDistance = Camera->GetComponentRotation().Vector() * HOLD_DISTANCE;
-	FVector Location = Camera->GetComponentLocation() + HoldDistance;
+	FVector Distance = Camera->GetComponentRotation().Vector() * HoldDistance;
+	FVector Location = Camera->GetComponentLocation() + Distance;
 
 	PhysicsHandle->SetTargetLocation(Location);
 }
@@ -438,6 +494,16 @@ void ADefaultCharacter::RotateObject()
 
 	// Set new rotation of object based on pitch and yaw
 	PhysicsHandle->SetTargetRotation(UKismetMathLibrary::MakeRotator(0.0f, Pitch, Yaw));
+}
+
+void ADefaultCharacter::SetHoldDistance(const int8 Direction)
+{
+	int32 NewDistance = HoldDistance + (Direction * GetWorld()->GetDeltaSeconds() * HOLD_DISTANCE_MULTIPLIER);
+
+	if (NewDistance > HOLD_DISTANCE_MIN && NewDistance < HOLD_DISTANCE_MAX)
+	{
+		HoldDistance = NewDistance;
+	}
 }
 
 void ADefaultCharacter::StartOverlayTransition()

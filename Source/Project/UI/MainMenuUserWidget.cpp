@@ -3,6 +3,7 @@
 
 #include "MainMenuUserWidget.h"
 #include "Actors/DefaultCharacter.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -64,34 +65,39 @@ void UMainMenuUserWidget::Quit()
 
 void UMainMenuUserWidget::StartLevelTransition(const EMainMenuButton Button)
 {
-	// Play the overlay transition animation
 	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 	{
+		// Start the overlay transition for the player character and get the duration of that animation
 		PC->StartOverlayTransition();
+		float LevelTransitionDuration = PC->Overlay->TransitionAnimation->GetEndTime();
+		
+		// Set a timer to change the map after the transition animation completes
+		FTimerHandle TransitionTimer;
+		FTimerDelegate ChangeLevel = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
+		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, ChangeLevel, LevelTransitionDuration, false);
 	}
-
-	// Set a timer to change the map after the transition animation completes
-	FTimerHandle TransitionTimer;
-	FTimerDelegate ChangeLevel = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
-	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, ChangeLevel, 1.0f, false);
 }
 
 void UMainMenuUserWidget::StartPanelTransition(const EMainMenuButton Button)
 {
+	float PanelTransitionDuration = 0.0f;
+
 	// Play the panel animation based on the button that was pressed
 	if (Button == EMainMenuButton::Play || Button == EMainMenuButton::Settings)
 	{
 		UUserWidget::PlayAnimationReverse(MainMenuPanelAnimation);
+		PanelTransitionDuration = MainMenuPanelAnimation->GetEndTime();
 	}
 	else if (Button == EMainMenuButton::Back)
 	{
 		UUserWidget::PlayAnimationReverse(SettingsPanelAnimation);
+		PanelTransitionDuration = SettingsPanelAnimation->GetEndTime();
 	}
 
 	// Set a timer to change the panel after the animation completes
 	FTimerHandle PanelTimer;
 	FTimerDelegate ChangePanel = FTimerDelegate::CreateUFunction(this, FName("ChangePanel"), Button);
-	GetWorld()->GetTimerManager().SetTimer(PanelTimer, ChangePanel, 1.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(PanelTimer, ChangePanel, PanelTransitionDuration, false);
 }
 
 void UMainMenuUserWidget::ChangeLevel(const EMainMenuButton Button)

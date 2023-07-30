@@ -10,7 +10,7 @@ public class Project : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] { "Project" });
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "InputCore", "SlateCore", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "InputCore", "LevelSequence", "MovieScene", "SlateCore", "UMG" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

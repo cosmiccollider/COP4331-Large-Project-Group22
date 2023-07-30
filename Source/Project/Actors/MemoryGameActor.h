@@ -32,22 +32,25 @@ public:
 	UFUNCTION()
 	void MemoryGameTriggered();
 	
+	/** Determines whether a game is currently in progress or not */
+	bool bGameActive = false;
+	
 	/** Determines whether an animation is currently in progress or not */
 	bool bActiveAnimation = false;
 
-protected:
-	/** Determines whether a game is currently in progress or not */
-	bool bGameActive = false;
+	/** Called to return the correct pattern array */
+	TArray<uint8> GetCorrectPattern() const { return CorrectPattern; };
 
+protected:
 	/** Stores the index at which a continue event will be triggered */
-	int32 ContinueIndex = 0;
+	uint8 ContinueIndex = 0;
 
 	/** Stores the current player patern, until a continue event is reached */
-	TArray<int32> PlayerPattern;
+	TArray<uint8> PlayerPattern;
 
 	/** Stores the correct pattern required to win the game */
-	TArray<int32> CorrectPattern;
-	
+	TArray<uint8> CorrectPattern;
+
 	/** Array of all Actors in the current level */
 	UPROPERTY()
 	TArray<AActor*> ActorArray;
@@ -62,7 +65,7 @@ protected:
 	 * @param	Pattern		specifies the correct pattern for the new game
 	 */
 	UFUNCTION()
-	void StartMemoryGame(TArray<int32> Pattern);
+	void StartMemoryGame(TArray<uint8> Pattern);
 
 	/** Called to assign the current actor to the player pattern */
 	UFUNCTION()
@@ -90,7 +93,7 @@ protected:
 	 * @param	ActorIndex		specifies the current actor to play the animation for in the recursive loop
 	 */
 	UFUNCTION()
-	void ContinueAnimation(int32 ActorIndex);
+	void ContinueAnimation(uint8 ActorIndex);
 
 	/** Called to play the win animation for all actors */
 	UFUNCTION()

@@ -6,6 +6,8 @@
 #include "Levels/DefaultLevelScriptActor.h"
 #include "UI/OverlayUserWidget.h"
 
+#define EXIT_DELAY 5.0f
+
 void UCreditsUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -18,7 +20,7 @@ void UCreditsUserWidget::NativeConstruct()
 
 		// Call ExitAnimation to play after 5 seconds to reveal ExitButton
 		FTimerHandle AnimationTimer;
-		GetWorld()->GetTimerManager().SetTimer(AnimationTimer, this, &UCreditsUserWidget::PlayExitAnimation, 5.0f, false);
+		GetWorld()->GetTimerManager().SetTimer(AnimationTimer, this, &UCreditsUserWidget::PlayExitAnimation, EXIT_DELAY, false);
 	}
 
 	// Bind SecretButton to Secret() function

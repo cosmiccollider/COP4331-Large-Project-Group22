@@ -1,25 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Levels/TestMapLevelScriptActor.h"
+#include "Levels/TestLevelScriptActor.h"
 #include "Actors/ButtonActor.h"
 #include "Actors/DefaultCharacter.h"
 #include "Actors/SimulatedActor.h"
 #include "Actors/TransitionActor.h"
-#include "Kismet/GameplayStatics.h"
-#include "UI/OverlayUserWidget.h"
-#include "TestMapLevelScriptActor.h"
 
 #define GRAVITY_SWITCH_ID "ButtonActor_1"
 #define TEST_BOX_ID "SimulatedActor_1"
 #define TEST_CUBE_ID "SimulatedActor_2"
 
-ATestMapLevelScriptActor::ATestMapLevelScriptActor()
+ATestLevelScriptActor::ATestLevelScriptActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void ATestMapLevelScriptActor::Tick(float DeltaTime)
+void ATestLevelScriptActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -39,23 +36,17 @@ void ATestMapLevelScriptActor::Tick(float DeltaTime)
 			FRotator SpawnRotation = FRotator(0);
 
 			TransitionActor = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);
-			
-			// TODO:
-			// Once all objects are in the container:
-			// Replace container with a new "completed" mesh
-			// Set a level specific boolean to true as one of the "checks" for finishing the level
-			// Set all pointers = nullptr so the function doesnt get checked anymore
 		}
 	}
 }
 
-void ATestMapLevelScriptActor::BeginPlay()
+void ATestLevelScriptActor::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Find all unique actors within the level
-	FindSimulatedActors(SimulatedActorArray);
 	FindButtonActors(ButtonActorArray);
+	FindSimulatedActors(SimulatedActorArray);
 
 	// Set GravitySwitch to active
 	if (GravitySwitch)
@@ -65,7 +56,7 @@ void ATestMapLevelScriptActor::BeginPlay()
 	}
 }
 
-void ATestMapLevelScriptActor::ButtonTriggered(AButtonActor* const Button)
+void ATestLevelScriptActor::ButtonTriggered(AButtonActor* const Button)
 {
 	if (Button == GravitySwitch)
 	{
@@ -75,7 +66,7 @@ void ATestMapLevelScriptActor::ButtonTriggered(AButtonActor* const Button)
 	}
 }
 
-void ATestMapLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& ButtonActors)
+void ATestLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& ButtonActors)
 {
 	for (AButtonActor* ButtonActor : ButtonActorArray)
 	{
@@ -86,7 +77,7 @@ void ATestMapLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& But
 	}
 }
 
-void ATestMapLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors)
+void ATestLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors)
 {
 	for (ASimulatedActor* SimulatedActor : SimulatedActorArray)
 	{

@@ -7,6 +7,7 @@
 #include "PauseMenuUserWidget.generated.h"
 
 class UButton;
+class UWidgetAnimation;
 
 UENUM()
 enum class EPauseMenuButton : uint8
@@ -106,7 +107,7 @@ protected:
 	UFUNCTION()
 	void ChangePanel(const EPauseMenuButton Button);
 
-	/** Stores the settings panel animation for this widget */
+	/** Stores the pause panel animation for this widget */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* PausePanelAnimation;
 

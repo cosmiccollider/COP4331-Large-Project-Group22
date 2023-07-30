@@ -9,6 +9,7 @@
 class UBorder;
 class UImage;
 class UTextBlock;
+class UWidgetAnimation;
 
 /**
  * OverlayUserWidget provides a HUD for the player character which delivers information

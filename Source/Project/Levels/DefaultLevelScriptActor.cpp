@@ -5,9 +5,13 @@
 #include "Actors/ButtonActor.h"
 #include "Actors/DefaultActor.h"
 #include "Actors/DefaultCharacter.h"
+#include "Actors/MemoryGameActor.h"
+#include "Actors/SafeActor.h"
 #include "Actors/SimulatedActor.h"
+#include "Animation/WidgetAnimation.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/OverlayUserWidget.h"
 
 #define CREDITS_MAP "CreditsMap"
 #define MAIN_MENU_MAP "MainMenuMap"
@@ -16,6 +20,11 @@
 ADefaultLevelScriptActor::ADefaultLevelScriptActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ADefaultLevelScriptActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void ADefaultLevelScriptActor::BeginPlay()
@@ -38,12 +47,13 @@ void ADefaultLevelScriptActor::EndLevel(ATransitionActor* const Actor, const ENe
 		if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 		{
 			PC->StartOverlayTransition();
-		}
+			float TransitionDuration = PC->GetOverlay()->TransitionAnimation->GetEndTime();
 
-		// Set a timer to open the next level after the transition animation completes
-		FTimerHandle TransitionTimer;
-		FTimerDelegate NextLevel = FTimerDelegate::CreateUFunction(this, FName("NextLevel"), Level);
-		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, NextLevel, 1.0f, false);
+			// Set a timer to open the next level after the transition animation completes
+			FTimerHandle TransitionTimer;
+			FTimerDelegate NextLevel = FTimerDelegate::CreateUFunction(this, FName("NextLevel"), Level);
+			GetWorld()->GetTimerManager().SetTimer(TransitionTimer, NextLevel, TransitionDuration, false);
+		}
 	}
 }
 
@@ -104,6 +114,14 @@ void ADefaultLevelScriptActor::SortActors(const TArray<AActor*>& Actors)
 		if (AButtonActor* ButtonActor = Cast<AButtonActor>(Actor))
 		{
 			ButtonActorArray.Add(ButtonActor);
+		}
+		else if (AMemoryGameActor* MemoryGameActor = Cast<AMemoryGameActor>(Actor))
+		{
+			MemoryGameActorArray.Add(MemoryGameActor);
+		}
+		else if (ASafeActor* SafeActor = Cast<ASafeActor>(Actor))
+		{
+			SafeActorArray.Add(SafeActor);
 		}
 		else if (ASimulatedActor* SimulatedActor = Cast<ASimulatedActor>(Actor))
 		{

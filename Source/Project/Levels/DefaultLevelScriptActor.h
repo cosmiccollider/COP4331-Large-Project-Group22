@@ -8,6 +8,8 @@
 
 class AActor;
 class AButtonActor;
+class AMemoryGameActor;
+class ASafeActor;
 class ASimulatedActor;
 class ATransitionActor;
 
@@ -29,6 +31,9 @@ class PROJECT_API ADefaultLevelScriptActor : public ALevelScriptActor
 public:
 	ADefaultLevelScriptActor();
 
+	/** Called every frame */
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
@@ -41,6 +46,14 @@ public:
 	/** Array of all ButtonActors in the current level */
 	UPROPERTY()
 	TArray<AButtonActor*> ButtonActorArray;
+
+	/** Array of all MemoryGameActors in the current level */
+	UPROPERTY()
+	TArray<AMemoryGameActor*> MemoryGameActorArray;
+
+	/** Array of all SafeActors in the current level */
+	UPROPERTY()
+	TArray<ASafeActor*> SafeActorArray;
 
 	/** Array of all SimulatedActors in the current level */
 	UPROPERTY()

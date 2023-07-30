@@ -13,8 +13,6 @@
 #include "Types/SlateEnums.h"
 #include "UI/OverlayUserWidget.h"
 
-#define LOCTEXT_NAMESPACE "FPS"
-
 void UMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -97,7 +95,7 @@ void UMenuUserWidget::NativeConstruct()
 
 	// Set the Max FPS text box based on the current max fps from the console
 	IConsoleVariable* Console = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"));
-	MaxFPSTextBox->SetText(FText::Format(LOCTEXT("FPS", "{FPS}"), Console->GetInt()));
+	MaxFPSTextBox->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{FPS}"), Console->GetInt()));
 }
 
 void UMenuUserWidget::Settings()

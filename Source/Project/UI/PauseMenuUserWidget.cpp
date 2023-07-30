@@ -3,6 +3,7 @@
 
 #include "PauseMenuUserWidget.h"
 #include "Actors/DefaultCharacter.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -86,31 +87,36 @@ void UPauseMenuUserWidget::Desktop()
 
 void UPauseMenuUserWidget::StartLevelTransition(const EPauseMenuButton Button)
 {
-	// Play the overlay transition animation
 	if (ADefaultCharacter* PC = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 	{
+		// Start the overlay transition for the player character and get the duration of that animation
 		PC->StartOverlayTransition();
-	}
-
-	// Unpause the game to allow a timer to start counting
-	Resume();
+		float LevelTransitionDuration = PC->Overlay->TransitionAnimation->GetEndTime();
+		
+		// Unpause the game to allow a timer to start counting
+		Resume();
 	
-	// Set a timer to change the level after the transition animation completes
-	FTimerHandle TransitionTimer;
-	FTimerDelegate ChangeLevel = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
-	GetWorld()->GetTimerManager().SetTimer(TransitionTimer, ChangeLevel, 1.0f, false);
+		// Set a timer to change the level after the transition animation completes
+		FTimerHandle TransitionTimer;
+		FTimerDelegate ChangeLevel = FTimerDelegate::CreateUFunction(this, FName("ChangeLevel"), Button);
+		GetWorld()->GetTimerManager().SetTimer(TransitionTimer, ChangeLevel, LevelTransitionDuration, false);
+	}
 }
 
 void UPauseMenuUserWidget::StartPanelTransition(const EPauseMenuButton Button)
 {
+	float PanelTransitionDuration = 0.0f;
+
 	// Play the panel animation based on the button that was pressed
 	if (Button == EPauseMenuButton::Resume || Button == EPauseMenuButton::Settings)
 	{
 		UUserWidget::PlayAnimationReverse(PausePanelAnimation);
+		PanelTransitionDuration = PausePanelAnimation->GetEndTime();
 	}
 	else if (Button == EPauseMenuButton::Back)
 	{
 		UUserWidget::PlayAnimationReverse(SettingsPanelAnimation);
+		PanelTransitionDuration = SettingsPanelAnimation->GetEndTime();
 	}
 
 	// Unpause the game to allow a timer to start counting
@@ -119,7 +125,7 @@ void UPauseMenuUserWidget::StartPanelTransition(const EPauseMenuButton Button)
 	// Set a timer to change the panel after the animation completes
 	FTimerHandle PanelTimer;
 	FTimerDelegate ChangePanel = FTimerDelegate::CreateUFunction(this, FName("ChangePanel"), Button);
-	GetWorld()->GetTimerManager().SetTimer(PanelTimer, ChangePanel, 1.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(PanelTimer, ChangePanel, PanelTransitionDuration, false);
 }
 
 void UPauseMenuUserWidget::ChangeLevel(const EPauseMenuButton Button)
