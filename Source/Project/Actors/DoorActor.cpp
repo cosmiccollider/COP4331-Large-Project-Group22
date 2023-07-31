@@ -12,6 +12,10 @@ ADoorActor::ADoorActor()
 	{
 		StaticMeshComponent->SetStaticMesh(DoorFinder.Object);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Props/SM_SolidDoor.SM_SolidDoor'"));
+	}
 
 	// Create a PhysicsConstraint, then attach it and constrain it to the StaticMeshComponent
 	PhysicsConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicsConstraintComponent"));

@@ -18,6 +18,10 @@ ASafeActor::ASafeActor()
 	{
 		StaticMeshComponent->SetStaticMesh(SafeBaseFinder.Object);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Props/SM_SafeBase.SM_SafeBase'"));
+	}
 
 	// Create DoorStaticMeshComponent and attach the StaticMeshComponent to it
 	DoorStaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorStaticMeshComponent"));
@@ -31,12 +35,20 @@ ASafeActor::ASafeActor()
 		DoorStaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 		DoorStaticMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Props/SM_SafeDoor.SM_SafeDoor'"));
+	}
 
 	// Set the safe level sequence
 	static ConstructorHelpers::FObjectFinder<ULevelSequence> SafeFinder(TEXT("/Game/Animations/LS_Safe.LS_Safe"));
 	if (SafeFinder.Succeeded())
 	{
 		SafeLevelSequence = SafeFinder.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Animations/LS_Safe.LS_Safe'"));
 	}
 }
 

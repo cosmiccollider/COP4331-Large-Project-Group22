@@ -154,7 +154,7 @@ void USafeUserWidget::UpdateDigitText(UTextBlock* const Digit, const ESafeDigitU
 		NewNum = (CurrentNum == 0) ? 9 : (CurrentNum - 1) % 10;
 	}
 	
-	Digit->SetText(FText::Format(NSLOCTEXT("Safe", "SafeNum", "{Num}"), NewNum));
+	Digit->SetText(FText::Format(NSLOCTEXT("Safe", "SafeNum", "{0}"), NewNum));
 
 	if (OwningSafe && IsCombinationCorrect())
 	{
@@ -170,6 +170,6 @@ bool USafeUserWidget::IsCombinationCorrect()
 	uint8 Digit3 = FCString::Atoi(*Digit3Text->GetText().ToString());
 	uint8 Digit4 = FCString::Atoi(*Digit4Text->GetText().ToString());
 
-	FString CurrentCombination = FText::Format(NSLOCTEXT("Safe", "SafeCombination", "{Digit1}{Digit2}{Digit3}{Digit4}"), Digit1, Digit2, Digit3, Digit4).ToString();
+	FString CurrentCombination = FText::Format(NSLOCTEXT("Safe", "SafeCombination", "{0}{1}{2}{3}"), Digit1, Digit2, Digit3, Digit4).ToString();
 	return OwningSafe->GetCorrectCombination().Equals(CurrentCombination);
 }

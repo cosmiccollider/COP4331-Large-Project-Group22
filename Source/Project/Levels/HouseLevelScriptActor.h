@@ -30,6 +30,43 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	/**
+	 * Triggers an event within the level based on the button that was pressed
+	 *
+	 * @param	Button		specifies the button that was pressed
+	 */
+	UFUNCTION()
+	void ButtonTriggered(AButtonActor* const CurrentButton);
+
+	/**
+	 * Triggers the memory game actor to either start or play a game
+	 *
+	 * @param	MemoryGameActor		specifies the memory game actor that was triggered
+	 */
+	UFUNCTION()
+	void MemoryGameTriggered(AMemoryGameActor* const MemoryGameActor);
+
+	/**
+	 * Triggers a safe interaction based on the safe that was clicked
+	 *
+	 * @param	Safe		specifies the safe that was clicked
+	 */
+	UFUNCTION()
+	void SafeTriggered(ASafeActor* const CurrentSafe);
+
+protected:
+	/** Determines whether the house is clean or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bCleanHouse = false;
+
+	/** Determines whether the yard is clean or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bCleanYard = false;
+
+	/** Determines whether the memory game is unlocked or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bMemoryGameUnlocked = false;
+
 	/** Stores the GravitySwitch for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AButtonActor* GravitySwitch;
@@ -42,29 +79,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ASafeActor* Safe;
 
-	/** Stores the PlaceholderObject for this level */
+	/** Stores the InsideObjects for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ASimulatedActor* PlaceholderObject;
+	TArray<ASimulatedActor*> InsideObjects;
 
-	/** Stores the PlaceholderContainer for this level */
+	/** Stores the InsideContainer for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ASimulatedActor* PlaceholderContainer;
+	ASimulatedActor* InsideContainer;
 
-	/**
-	 * Triggers an event within the level based on the button that was pressed
-	 *
-	 * @param	Button		specifies the specific button that was pressed
-	 */
-	UFUNCTION()
-	void ButtonTriggered(AButtonActor* const CurrentButton);
+	/** Stores the OutsideObjects for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<ASimulatedActor*> OutsideObjects;
 
-	/**
-	 * Triggers an event within the level based on the safe that was pressed
-	 *
-	 * @param	Safe		specifies the specific safe that was pressed
-	 */
-	UFUNCTION()
-	void SafeTriggered(ASafeActor* const CurrentSafe);
+	/** Stores the OutsideContainer for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* OutsideContainer;
 
 	/**
 	 * Finds all unique ButtonActors based on defined actor ID names
@@ -89,4 +118,8 @@ public:
 	 */
 	UFUNCTION()
 	void FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors);
+
+	/** Called to check whether all simulated actors are in their correct containers */
+	UFUNCTION()
+	void CheckObjectsInContainers(TArray<ASimulatedActor*> Objects, ASimulatedActor* Container);
 };

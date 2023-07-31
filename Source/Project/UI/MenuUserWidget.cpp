@@ -95,7 +95,7 @@ void UMenuUserWidget::NativeConstruct()
 
 	// Set the Max FPS text box based on the current max fps from the console
 	IConsoleVariable* Console = IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"));
-	MaxFPSTextBox->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{FPS}"), Console->GetInt()));
+	MaxFPSTextBox->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{0}"), Console->GetInt()));
 }
 
 void UMenuUserWidget::Settings()

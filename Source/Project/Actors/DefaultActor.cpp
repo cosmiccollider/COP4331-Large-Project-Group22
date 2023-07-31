@@ -20,6 +20,10 @@ ADefaultActor::ADefaultActor()
 		StaticMeshComponent->SetStaticMesh(CubeFinder.Object);
 		StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Engine/BasicShapes/Cube.Cube'"));
+	}
 }
 
 void ADefaultActor::Tick(float DeltaTime)

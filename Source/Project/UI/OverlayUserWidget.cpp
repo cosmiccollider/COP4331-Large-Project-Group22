@@ -45,7 +45,7 @@ void UOverlayUserWidget::SetFPSText()
 	{
 		// Get the time since the last frame and update the FPS with it
 		float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(this);
-		FPSText->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{FPS} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
+		FPSText->SetText(FText::Format(NSLOCTEXT("FPS", "FPSValue", "{0} FPS"), UKismetMathLibrary::FTrunc(1.0f / DeltaTime)));
 	}
 }
 

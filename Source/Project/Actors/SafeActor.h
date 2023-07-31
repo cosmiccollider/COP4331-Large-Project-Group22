@@ -54,7 +54,7 @@ protected:
 
 	/** Determines the correct combination in string form */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString CorrectCombination;
+	FString CorrectCombination = "1111";
 
 	/** Stores the DoorStaticMeshComponent for this actor */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

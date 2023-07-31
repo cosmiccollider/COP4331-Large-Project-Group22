@@ -258,7 +258,7 @@ protected:
 
 	/** Determines how far away the player holds an object that's currently being grabbed (in centimeters) */
 	UPROPERTY()
-	int32 HoldDistance = 200;
+	int32 HoldDistance;
 
 	/**
 	 * Set the HoldDistance, which determines how far away the player holds an object

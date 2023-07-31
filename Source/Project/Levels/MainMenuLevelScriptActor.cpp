@@ -15,6 +15,10 @@ AMainMenuLevelScriptActor::AMainMenuLevelScriptActor()
 	{
 		MainMenuClass = MainMenuFinder.Class;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/UI/WBP_MainMenu.WBP_MainMenu_C'"));
+	}
 }
 
 void AMainMenuLevelScriptActor::BeginPlay()

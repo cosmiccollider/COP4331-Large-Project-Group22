@@ -15,6 +15,10 @@ ACreditsLevelScriptActor::ACreditsLevelScriptActor()
 	{
 		CreditsClass = CreditsFinder.Class;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/UI/WBP_Credits.WBP_Credits_C'"));
+	}
 }
 
 void ACreditsLevelScriptActor::BeginPlay()

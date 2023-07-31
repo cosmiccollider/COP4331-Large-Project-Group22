@@ -62,12 +62,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		DefaultMappingContext = DefaultMappingContextFinder.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/IMC_Default.IMC_Default'"));
+	}
 
 	// Set CrouchAction to IA_Crouch data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> CrouchActionFinder(TEXT("/Game/Input/Actions/IA_Crouch.IA_Crouch"));
 	if (CrouchActionFinder.Succeeded())
 	{
 		CrouchAction = CrouchActionFinder.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Crouch.IA_Crouch'"));
 	}
 
 	// Set JumpAction to IA_Jump data asset
@@ -76,12 +84,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		JumpAction = JumpActionFinder.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Jump.IA_Jump'"));
+	}
 
 	// Set LookAction to IA_Look data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionFinder(TEXT("/Game/Input/Actions/IA_Look.IA_Look"));
 	if (LookActionFinder.Succeeded())
 	{
 		LookAction = LookActionFinder.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Look.IA_Look'"));
 	}
 
 	// Set MoveAction to IA_Move data asset
@@ -90,12 +106,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		MoveAction = MoveActionFinder.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Move.IA_Move'"));
+	}
 
 	// Set PauseAction to IA_Pause data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> PauseActionFinder(TEXT("/Game/Input/Actions/IA_Pause.IA_Pause"));
 	if (PauseActionFinder.Succeeded())
 	{
 		PauseAction = PauseActionFinder.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Pause.IA_Pause'"));
 	}
 
 	// Set PrimaryAction to IA_Primary data asset
@@ -104,12 +128,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		PrimaryAction = PrimaryActionFinder.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Primary.IA_Primary'"));
+	}
 
 	// Set SecondaryAction to IA_Secondary data asset
 	static ConstructorHelpers::FObjectFinder<UInputAction> SecondaryActionFinder(TEXT("/Game/Input/Actions/IA_Secondary.IA_Secondary"));
 	if (SecondaryActionFinder.Succeeded())
 	{
 		SecondaryAction = SecondaryActionFinder.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Secondary.IA_Secondary'"));
 	}
 	
 	// Set ScrollAction to IA_Scroll data asset
@@ -118,12 +150,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		ScrollAction = ScrollActionFinder.Object;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Input/Actions/IA_Scroll.IA_Scroll'"));
+	}
 
 	// Set OverlayClass to OverlayWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<UOverlayUserWidget> OverlayFinder(TEXT("/Game/UI/WBP_Overlay.WBP_Overlay_C"));
 	if (OverlayFinder.Succeeded())
 	{
 		OverlayClass = OverlayFinder.Class;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/UI/WBP_Overlay.WBP_Overlay_C'"));
 	}
 
 	// Set PauseMenuClass to PauseMenuWidgetBlueprint class
@@ -132,12 +172,20 @@ ADefaultCharacter::ADefaultCharacter()
 	{
 		PauseMenuClass = PauseMenuFinder.Class;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/UI/WBP_PauseMenu.WBP_PauseMenu_C'"));
+	}
 
 	// Set SafeUIClass to SafeWidgetBlueprint class
 	static ConstructorHelpers::FClassFinder<USafeUserWidget> SafeUIFinder(TEXT("/Game/UI/WBP_Safe.WBP_Safe_C"));
 	if (SafeUIFinder.Succeeded())
 	{
 		SafeUIClass = SafeUIFinder.Class;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/UI/WBP_Safe.WBP_Safe_C'"));
 	}
 }
 
@@ -400,7 +448,15 @@ void ADefaultCharacter::TriggerMemoryGame(FHitResult& OutHit)
 		// Check that the actor is not currently in an animation
 		if (!MemoryGameActor->bActiveAnimation)
 		{
-			MemoryGameActor->MemoryGameTriggered();
+			// Determine which level script is currently active and call the relative function for that level
+			if (ATestLevelScriptActor* TestLevelScript = Cast<ATestLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+			{
+				MemoryGameActor->MemoryGameTriggered();
+			}
+			else if (AHouseLevelScriptActor* HouseLevelScript = Cast<AHouseLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+			{
+				HouseLevelScript->MemoryGameTriggered(MemoryGameActor);
+			}
 		}
 	}
 }
@@ -437,8 +493,8 @@ void ADefaultCharacter::StartGrab(FHitResult& OutHit)
 	// Check that the actor in front of the player is a SimulatedActor
 	if (CanLineTrace(OutHit) && UKismetMathLibrary::ClassIsChildOf(OutHit.GetActor()->GetClass(), ASimulatedActor::StaticClass()))
 	{
-		// Reset the HoldDistance to 200
-		HoldDistance = 200;
+		// Reset the HoldDistance to 150
+		HoldDistance = 150;
 
 		// Initialize a zeroed FRotator and grab the hit result with that rotation
 		// A zeroed FRotator is necessary for the rotation function because the default FRotator() constructor does not initialize a value of 0

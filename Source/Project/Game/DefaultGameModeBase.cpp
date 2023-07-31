@@ -3,12 +3,8 @@
 
 #include "DefaultGameModeBase.h"
 #include "Actors/DefaultCharacter.h"
-//#include "UObject/ConstructorHelpers.h"
 
 ADefaultGameModeBase::ADefaultGameModeBase()
 {
-	/*static ConstructorHelpers::FClassFinder<APawn> DefaultCharacterFinder(TEXT("/Game/Characters/BP_FirstPersonCharacter.BP_FirstPersonCharacter_C"));
-	if (DefaultCharacterFinder.Succeeded()) DefaultPawnClass = DefaultCharacterFinder.Class;*/
-
 	DefaultPawnClass = ADefaultCharacter::StaticClass();
 }

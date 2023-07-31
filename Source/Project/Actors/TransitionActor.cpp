@@ -11,6 +11,10 @@ ATransitionActor::ATransitionActor()
 	{
 		StaticMeshComponent->SetStaticMesh(StarFinder.Object);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset not found: '/Game/Props/SM_Star.SM_Star'"));
+	}
 }
 
 void ATransitionActor::Tick(float DeltaTime)

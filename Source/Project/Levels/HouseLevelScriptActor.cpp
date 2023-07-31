@@ -9,10 +9,18 @@
 #include "Actors/SimulatedActor.h"
 #include "Actors/TransitionActor.h"
 
-#define GRAVITY_SWITCH_ID "ButtonActor_1"
-#define PLACEHOLDER_CONTAINER_ID "SimulatedActor_1"
-#define PLACEHOLDER_OBJECT_ID "SimulatedActor_2"
-#define SAFE_ID "SafeActor_1"
+#define GRAVITY_ID "Placeholder"
+#define SAFE_ID "Placeholder"
+
+#define INSIDE_CONTAINER_ID "Placeholder"
+#define INSIDE_OBJECT_1_ID "Placeholder"
+#define INSIDE_OBJECT_2_ID "Placeholder"
+#define INSIDE_OBJECT_3_ID "Placeholder"
+
+#define OUTSIDE_CONTAINER_ID "Placeholder"
+#define OUTSIDE_OBJECT_1_ID "Placeholder"
+#define OUTSIDE_OBJECT_2_ID "Placeholder"
+#define OUTSIDE_OBJECT_3_ID "Placeholder"
 
 AHouseLevelScriptActor::AHouseLevelScriptActor()
 {
@@ -30,23 +38,42 @@ void AHouseLevelScriptActor::Tick(float DeltaTime)
 		Safe->SetCorrectCombination(MemoryGameActor->GetCorrectPattern());
 	}
 
-	// Check that all objects and containers exist
-	if (PlaceholderObject && PlaceholderContainer)
+	// If the memory game isn't unlocked yet, continue to check if objects are being put in containers
+	if (!bMemoryGameUnlocked)
 	{
-		// Check that all objects are inside their respective containers
-		if (IsObjectInContainer(PlaceholderObject, PlaceholderContainer))
+		// Check if the house is cleaned
+		if (!bCleanHouse)
 		{
-			// Dereference objects so this function doesn't get checked anymore
-			PlaceholderObject = nullptr;
-			PlaceholderContainer = nullptr;
+			CheckObjectsInContainers(InsideObjects, InsideContainer);
+			
+			if (InsideObjects.Num() == 0)
+			{
+				bCleanHouse = true;
+			}
+		}
 
-			// Change star location to inside safe (also change scale so it doesn't clip through)
-			FVector SpawnLocation = FVector(-180, 400, 250);
-			FRotator SpawnRotation = FRotator(0);
+		// Check if the yard is cleaned
+		if (!bCleanYard)
+		{
+			CheckObjectsInContainers(OutsideObjects, OutsideContainer);
 
-			TransitionActor = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);
+			if (OutsideObjects.Num() == 0)
+			{
+				bCleanYard = true;
+			}
+		}
+
+		// If both are cleaned, unlock the memory game
+		if (bCleanHouse && bCleanYard)
+		{
+			bMemoryGameUnlocked = true;
 		}
 	}
+	
+	/*FVector SpawnLocation = FVector(-180, 400, 250);
+	FRotator SpawnRotation = FRotator(0);
+
+	TransitionActor = GetWorld()->SpawnActor<ATransitionActor>(SpawnLocation, SpawnRotation);*/
 }
 
 void AHouseLevelScriptActor::BeginPlay()
@@ -83,6 +110,14 @@ void AHouseLevelScriptActor::ButtonTriggered(AButtonActor* const CurrentButton)
 	}
 }
 
+void AHouseLevelScriptActor::MemoryGameTriggered(AMemoryGameActor* const CurrentMemoryGameActor)
+{
+	if (bMemoryGameUnlocked)
+	{
+		CurrentMemoryGameActor->MemoryGameTriggered();
+	}
+}
+
 void AHouseLevelScriptActor::SafeTriggered(ASafeActor* const CurrentSafe)
 {
 	if (CurrentSafe == Safe)
@@ -95,7 +130,7 @@ void AHouseLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& Butto
 {
 	for (AButtonActor* ButtonActor : ButtonActorArray)
 	{
-		if (ButtonActor->GetName() == GRAVITY_SWITCH_ID)
+		if (ButtonActor->GetName() == GRAVITY_ID)
 		{
 			GravitySwitch = ButtonActor;
 		}
@@ -117,14 +152,36 @@ void AHouseLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>&
 {
 	for (ASimulatedActor* SimulatedActor : SimulatedActorArray)
 	{
-		if (SimulatedActor->GetName() == PLACEHOLDER_OBJECT_ID)
+		if (SimulatedActor->GetName() == INSIDE_CONTAINER_ID)
 		{
-			PlaceholderObject = SimulatedActor;
+			InsideContainer = SimulatedActor;
 		}
-
-		if (SimulatedActor->GetName() == PLACEHOLDER_CONTAINER_ID)
+		else if (SimulatedActor->GetName() == OUTSIDE_CONTAINER_ID)
 		{
-			PlaceholderContainer = SimulatedActor;
+			OutsideContainer = SimulatedActor;
+		}
+		else if (SimulatedActor->GetName() == INSIDE_OBJECT_1_ID
+		|| SimulatedActor->GetName() == INSIDE_OBJECT_2_ID
+		|| SimulatedActor->GetName() == INSIDE_OBJECT_3_ID)
+		{
+			InsideObjects.Add(SimulatedActor);
+		}
+		else if (SimulatedActor->GetName() == OUTSIDE_OBJECT_1_ID
+		|| SimulatedActor->GetName() == OUTSIDE_OBJECT_2_ID
+		|| SimulatedActor->GetName() == OUTSIDE_OBJECT_3_ID)
+		{
+			OutsideObjects.Add(SimulatedActor);
+		}
+	}
+}
+
+void AHouseLevelScriptActor::CheckObjectsInContainers(TArray<ASimulatedActor*> Objects, ASimulatedActor* Container)
+{
+	for (ASimulatedActor* Object : Objects)
+	{
+		if (IsObjectInContainer(Object, Container))
+		{
+			Objects.Remove(Object);
 		}
 	}
 }
