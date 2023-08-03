@@ -3,6 +3,7 @@
 
 #include "MainMenuLevelScriptActor.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuUserWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -23,6 +24,12 @@ AMainMenuLevelScriptActor::AMainMenuLevelScriptActor()
 
 void AMainMenuLevelScriptActor::BeginPlay()
 {
+	if (UGameUserSettings* Settings = UGameUserSettings::GetGameUserSettings())
+	{
+		Settings->UGameUserSettings::SetVSyncEnabled(true);
+		Settings->ApplySettings(false);
+	}
+
 	APlayerController* PController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	// Create Main Menu and add it to the screen
