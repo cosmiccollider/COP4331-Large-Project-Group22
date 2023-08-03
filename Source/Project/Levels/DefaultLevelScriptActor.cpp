@@ -14,6 +14,7 @@
 #include "UI/OverlayUserWidget.h"
 
 #define CREDITS_MAP "CreditsMap"
+#define HOUSE_MAP "HouseMap"
 #define MAIN_MENU_MAP "MainMenuMap"
 #define TEST_MAP "TestMap"
 
@@ -59,13 +60,21 @@ void ADefaultLevelScriptActor::EndLevel(ATransitionActor* const Actor, const ENe
 
 bool ADefaultLevelScriptActor::IsObjectInContainer(ASimulatedActor* const Object, ASimulatedActor* const Container)
 {
-	FVector ObjectOrigin = Object->GetActorLocation();
+	if (Object && Container)
+	{
+		FVector ObjectOrigin = Object->GetActorLocation();
 
-	FVector ContainerOrigin;
-	FVector ContainerBoxExtent;
-	Container->GetActorBounds(false, ContainerOrigin, ContainerBoxExtent);
+		FVector ContainerOrigin;
+		FVector ContainerBoxExtent;
+		Container->GetActorBounds(false, ContainerOrigin, ContainerBoxExtent);
 
-	return UKismetMathLibrary::IsPointInBox(ObjectOrigin, ContainerOrigin, ContainerBoxExtent);
+		// Add a small amount to extent on the Z axis to allow for slight inconsistencies
+		ContainerBoxExtent = FVector(ContainerBoxExtent.X, ContainerBoxExtent.Y, ContainerBoxExtent.Z * 1.2);
+
+		return UKismetMathLibrary::IsPointInBox(ObjectOrigin, ContainerOrigin, ContainerBoxExtent);
+	}
+
+	return false;
 }
 
 void ADefaultLevelScriptActor::NextLevel(const ENextLevel Level)
@@ -81,7 +90,11 @@ void ADefaultLevelScriptActor::NextLevel(const ENextLevel Level)
 	{
 		FString CurrentLevel = UGameplayStatics::GetCurrentLevelName(GetWorld());
 		
-		if (CurrentLevel == TEST_MAP)
+		if (CurrentLevel == HOUSE_MAP)
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), CREDITS_MAP);
+		}
+		else if (CurrentLevel == TEST_MAP)
 		{
 			UGameplayStatics::OpenLevel(GetWorld(), CREDITS_MAP);
 		}

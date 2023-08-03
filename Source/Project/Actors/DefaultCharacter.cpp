@@ -280,6 +280,16 @@ void ADefaultCharacter::BeginPlay()
 			{
 				Overlay->ShowReticle(true);
 			}
+
+			// If the player is in the house map, store the player character and overlay, then load the initial narrative
+			if (AHouseLevelScriptActor* HouseLevelScript = Cast<AHouseLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+			{
+				HouseLevelScript->PlayerCharacter = this;
+				HouseLevelScript->PlayerOverlay = Overlay;
+				
+				Overlay->RevealNarrative();
+				Overlay->SetNarrativeText(FText(FText::FromString("Ahhh, waking up to another day in paradise.")));
+			}
 		}
 	}
 }

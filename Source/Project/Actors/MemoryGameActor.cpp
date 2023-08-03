@@ -3,9 +3,10 @@
 
 #include "Actors/MemoryGameActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Levels/DefaultLevelScriptActor.h"
 #include "UObject/ConstructorHelpers.h"
 
-#define CONTINUE_INITIAL_GAP 2.0f
+#define CONTINUE_INITIAL_GAP 1.5f
 #define CONTINUE_INTERVAL 1.0f
 #define END_DURATION 5.0f
 #define GLOW_INTENSITY 10.0f
@@ -13,27 +14,16 @@
 #define POST_SELECT_INPUT_GAP 0.6f
 #define SELECT_DURATION 0.5f
 
-void AMemoryGameActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// Find all actors of the class AMemoryGameActor
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMemoryGameActor::StaticClass(), ActorArray);
-
-	// Cast those actors to an array of type AMemoryGameActor
-	for (AActor* Actor : ActorArray)
-	{
-		if (AMemoryGameActor* MemoryGameActor = Cast<AMemoryGameActor>(Actor))
-		{
-			MemoryGameActorArray.Add(MemoryGameActor);
-		}
-	}
-}
-
 void AMemoryGameActor::MemoryGameTriggered()
 {
 	// Start by locking input so the player cannot interrupt any of the timers
 	LockInput(true);
+
+	// Find all memory game actors in the current level
+	if (ADefaultLevelScriptActor* DefaultLevelScript = Cast<ADefaultLevelScriptActor>(GetWorld()->GetLevelScriptActor()))
+	{
+		MemoryGameActorArray = DefaultLevelScript->MemoryGameActorArray;
+	}
 
 	// Create a new game if there isn't one active
 	if (!bGameActive)
@@ -42,7 +32,7 @@ void AMemoryGameActor::MemoryGameTriggered()
 		TArray<uint8> RandomPattern;
 		for (int i = 0; i < PATTERN_LENGTH; i++)
 		{
-			RandomPattern.Add(FMath::RandRange(0, MemoryGameActorArray.Num()));
+			RandomPattern.Add(FMath::RandRange(0, MemoryGameActorArray.Num() - 1));
 		}
 
 		StartMemoryGame(RandomPattern);
@@ -129,6 +119,7 @@ void AMemoryGameActor::SyncMemoryGameActors()
 		Actors->ContinueIndex = this->ContinueIndex;
 		Actors->PlayerPattern = this->PlayerPattern;
 		Actors->CorrectPattern = this->CorrectPattern;
+		Actors->MemoryGameActorArray = this->MemoryGameActorArray;
 	}
 }
 

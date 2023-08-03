@@ -45,10 +45,10 @@ public:
 	/**
 	 * Called to set the glow effect for this actor using DynamicMaterial
 	 *
-	 * @param	Value		specifies the multiplier on the glow effect
+	 * @param	Glow		specifies the multiplier on the glow effect
 	 */
 	UFUNCTION()
-	void SetGlow(const float Value);
+	void SetGlow(const float Glow);
 
 	/** Stores the BlinkTimer handle for this actor */
 	FTimerHandle BlinkTimer;
@@ -57,17 +57,17 @@ public:
 	 * Called to start a blinking glow effect for this actor
 	 *
 	 * @param	InRate		specifies the rate at which the actor will blink
-	 * @param	Value		specifies the multiplier on the glow effect
+	 * @param	Glow		specifies the multiplier on the glow effect
 	 */
 	UFUNCTION()
-	void StartBlinking(const float InRate, const float Value);
+	void StartBlinking(const float InRate, const float Glow);
 
 	/** Called to trigger a single blink event for this actor
 	 *
-	 * @param	Value		specifies the multiplier on the glow effect
+	 * @param	Glow		specifies the multiplier on the glow effect
 	 */
 	UFUNCTION()
-	void Blink(const float Value);
+	void Blink(const float Glow);
 
 	/** Called to stop a blinking glow effect for this actor */
 	UFUNCTION()

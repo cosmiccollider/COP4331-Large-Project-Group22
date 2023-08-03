@@ -75,6 +75,11 @@ void ATestLevelScriptActor::FindButtonActors(const TArray<AButtonActor*>& Button
 			GravitySwitch = ButtonActor;
 		}
 	}
+
+	if (!GravitySwitch)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor not found: GravitySwitch"));
+	}
 }
 
 void ATestLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors)
@@ -90,5 +95,15 @@ void ATestLevelScriptActor::FindSimulatedActors(const TArray<ASimulatedActor*>& 
 		{
 			TestBox = SimulatedActor;
 		}
+	}
+
+	if (!TestCube)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor not found: TestCube"));
+	}
+
+	if (!TestBox)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor not found: TestBox"));
 	}
 }

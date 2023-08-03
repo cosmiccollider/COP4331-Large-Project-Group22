@@ -61,7 +61,7 @@ void ASafeActor::BeginPlay()
 	}
 }
 
-void ASafeActor::SetCorrectCombination(TArray<uint8> Combination)
+void ASafeActor::SetCorrectCombination(const TArray<uint8>& Combination)
 {
 	CorrectCombination.Empty();
 

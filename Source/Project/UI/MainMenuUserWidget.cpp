@@ -9,7 +9,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/OverlayUserWidget.h"
 
-#define TEST_MAP "TestMap"
+#define HOUSE_MAP "HouseMap"
 
 void UMainMenuUserWidget::NativeConstruct()
 {
@@ -104,7 +104,7 @@ void UMainMenuUserWidget::ChangeLevel(const EMainMenuButton Button)
 {
 	if (Button == EMainMenuButton::Play)
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), TEST_MAP);
+		UGameplayStatics::OpenLevel(GetWorld(), HOUSE_MAP);
 		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		FInputModeGameOnly InputMode;
 		PC->SetInputMode(InputMode);

@@ -37,7 +37,7 @@ public:
 	 * @param	Combination		specifies an array which represents each correct digit in order
 	 */
 	UFUNCTION()
-	void SetCorrectCombination(TArray<uint8> Combination);
+	void SetCorrectCombination(const TArray<uint8>& Combination);
 
 	/** Called to open the user interface and attempt to open the safe */
 	UFUNCTION()
@@ -46,15 +46,15 @@ public:
 	/** Called to play the animation of opening the safe */
 	UFUNCTION()
 	void OpenSafe();
-
-protected:
+	
 	/** Determines whether the safe is currently open or not */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bSafeOpen = false;
 
+protected:
 	/** Determines the correct combination in string form */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString CorrectCombination = "1111";
+	FString CorrectCombination = "1112";
 
 	/** Stores the DoorStaticMeshComponent for this actor */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

@@ -7,9 +7,11 @@
 #include "HouseLevelScriptActor.generated.h"
 
 class AButtonActor;
-class ASafeActor;
+class ADefaultCharacter;
 class AMemoryGameActor;
+class ASafeActor;
 class ASimulatedActor;
+class UOverlayUserWidget;
 
 /**
  * HouseLevelScriptActor provides the level specific capabilities of the HouseMap.
@@ -30,10 +32,26 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	/** Stores the player character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ADefaultCharacter* PlayerCharacter;
+
+	/** Stores the player overlay */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UOverlayUserWidget* PlayerOverlay;
+
+	/** Stores the max number of InsideObjects for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 InsideObjectsMax;
+
+	/** Stores the max number of OutsideObjects for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 OutsideObjectsMax;
+
 	/**
 	 * Triggers an event within the level based on the button that was pressed
 	 *
-	 * @param	Button		specifies the button that was pressed
+	 * @param	CurrentButton		specifies the button that was pressed
 	 */
 	UFUNCTION()
 	void ButtonTriggered(AButtonActor* const CurrentButton);
@@ -49,12 +67,48 @@ public:
 	/**
 	 * Triggers a safe interaction based on the safe that was clicked
 	 *
-	 * @param	Safe		specifies the safe that was clicked
+	 * @param	CurrentSafe		specifies the safe that was clicked
 	 */
 	UFUNCTION()
 	void SafeTriggered(ASafeActor* const CurrentSafe);
 
 protected:
+	/** Determines whether the initial narrative has been delivered or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bInitialNarrativeDelivered = false;
+
+	/** Called to deliver the initial narrative */
+	UFUNCTION()
+	void DeliverInitialNarrative();
+
+	/** Determines whether the barista narrative has been delivered or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bBaristaNarrativeDelivered = false;
+
+	/** Called to deliver the barista narrative */
+	UFUNCTION()
+	void DeliverBaristaNarrative();
+
+	/** Determines whether the objectives have been delivered or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bObjectivesDelivered = false;
+	
+	/** Called to deliver the objectives */
+	UFUNCTION()
+	void DeliverObjectives();
+
+	/** Called to reveal the objectives */
+	UFUNCTION()
+	void RevealObjectives();
+
+	/** Determines whether the cat has been checked on or not */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bCheckedCat = false;
+
+	/** Called to remove the narrative */
+	UFUNCTION()
+	void RemoveNarrative();
+
 	/** Determines whether the house is clean or not */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bCleanHouse = false;
@@ -66,34 +120,18 @@ protected:
 	/** Determines whether the memory game is unlocked or not */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bMemoryGameUnlocked = false;
-
-	/** Stores the GravitySwitch for this level */
+	
+	/** Determines whether the scuba gear has been returned or not */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AButtonActor* GravitySwitch;
+	bool bScubaGearReturned = false;
 
 	/** Stores the MemoryGameActor for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AMemoryGameActor* MemoryGameActor;
 
-	/** Stores the Safe for this level */
+	/** Stores the GravitySwitch for this level */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ASafeActor* Safe;
-
-	/** Stores the InsideObjects for this level */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<ASimulatedActor*> InsideObjects;
-
-	/** Stores the InsideContainer for this level */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ASimulatedActor* InsideContainer;
-
-	/** Stores the OutsideObjects for this level */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<ASimulatedActor*> OutsideObjects;
-
-	/** Stores the OutsideContainer for this level */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ASimulatedActor* OutsideContainer;
+	AButtonActor* GravitySwitch;
 
 	/**
 	 * Finds all unique ButtonActors based on defined actor ID names
@@ -102,6 +140,10 @@ protected:
 	 */
 	UFUNCTION()
 	void FindButtonActors(const TArray<AButtonActor*>& ButtonActors);
+	
+	/** Stores the Safe for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASafeActor* Safe;
 
 	/**
 	 * Finds all unique SafeActors based on defined actor ID names
@@ -110,6 +152,30 @@ protected:
 	 */
 	UFUNCTION()
 	void FindSafeActors(const TArray<ASafeActor*>& SafeActors);
+	
+	/** Stores the InsideContainer for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* InsideContainer;
+
+	/** Stores the InsideObjects for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<ASimulatedActor*> InsideObjects;
+
+	/** Stores the OutsideContainer for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* OutsideContainer;
+
+	/** Stores the OutsideObjects for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<ASimulatedActor*> OutsideObjects;
+
+	/** Stores the ScubaGear for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* ScubaGear;
+
+	/** Stores the LeineckersYard for this level */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ASimulatedActor* LeineckersYard;
 
 	/**
 	 * Finds all unique SimulatedActors based on defined actor ID names
@@ -119,7 +185,16 @@ protected:
 	UFUNCTION()
 	void FindSimulatedActors(const TArray<ASimulatedActor*>& SimulatedActors);
 
-	/** Called to check whether all simulated actors are in their correct containers */
+	/**
+	 * Called to check whether all simulated actors are in their correct containers
+	 *
+	 * @param	Objects			specifies the array of objects
+	 * @param	Container		specifies the respective container
+	 */
 	UFUNCTION()
-	void CheckObjectsInContainers(TArray<ASimulatedActor*> Objects, ASimulatedActor* Container);
+	void CheckObjectsInContainers(TArray<ASimulatedActor*>& Objects, ASimulatedActor* const Container);
+
+	/** Called to attempt to unlock the memory game */
+	UFUNCTION()
+	void UnlockMemoryGame();
 };

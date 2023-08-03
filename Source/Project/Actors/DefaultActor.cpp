@@ -45,29 +45,29 @@ void ADefaultActor::SetBaseColor(const FLinearColor Color)
 	DynamicMaterial->SetVectorParameterValue(TEXT("Base Color"), Color);
 }
 
-void ADefaultActor::SetGlow(const float Value)
+void ADefaultActor::SetGlow(const float Glow)
 {
-	DynamicMaterial->SetScalarParameterValue(TEXT("Glow"), Value);
+	DynamicMaterial->SetScalarParameterValue(TEXT("Glow"), Glow);
 }
 
-void ADefaultActor::StartBlinking(const float InRate, const float Value)
+void ADefaultActor::StartBlinking(const float InRate, const float Glow)
 {
-	FTimerDelegate BlinkFunction = FTimerDelegate::CreateUFunction(this, FName("Blink"), Value);
+	FTimerDelegate BlinkFunction = FTimerDelegate::CreateUFunction(this, FName("Blink"), Glow);
 	GetWorld()->GetTimerManager().SetTimer(BlinkTimer, BlinkFunction, InRate, true);
 }
 
-void ADefaultActor::Blink(const float Value)
+void ADefaultActor::Blink(const float Glow)
 {
-	float Glow;
-	DynamicMaterial->GetScalarParameterValue(TEXT("Glow"), Glow);
+	float CurrentGlow;
+	DynamicMaterial->GetScalarParameterValue(TEXT("Glow"), CurrentGlow);
 
-	if (Glow != 0.0f)
+	if (CurrentGlow != 0.0f)
 	{
 		SetGlow(0.0f);
 	}
 	else
 	{
-		SetGlow(Value);
+		SetGlow(Glow);
 	}
 }
 

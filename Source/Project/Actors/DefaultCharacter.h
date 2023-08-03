@@ -278,8 +278,7 @@ public:
 	/** Updates the location of the mouse to be the center of the screen */
 	UFUNCTION()
 	void SetMouseCenter();
-
-protected:
+	
 	/**
 	 * Attempts to draw a line trace from the camera to a set distance in front of the character
 	 *

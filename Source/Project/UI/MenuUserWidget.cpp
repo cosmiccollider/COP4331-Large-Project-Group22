@@ -86,7 +86,7 @@ void UMenuUserWidget::NativeConstruct()
 	{
 		if (UOverlayUserWidget* Overlay = PC->GetOverlay())
 		{
-			if (Overlay->FPSText->GetVisibility() == ESlateVisibility::Visible)
+			if (Overlay->FPSTextBox->GetVisibility() == ESlateVisibility::Visible)
 			{
 				FPSCheckBox->SetCheckedState(ECheckBoxState::Checked);
 			}

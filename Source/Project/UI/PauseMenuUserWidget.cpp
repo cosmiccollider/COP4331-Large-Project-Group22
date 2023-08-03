@@ -171,16 +171,19 @@ void UPauseMenuUserWidget::ResumeGame()
 	APlayerController* PController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	ADefaultCharacter* PCharacter = Cast<ADefaultCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	// Remove Pause Menu from the screen
-	PCharacter->PauseMenu->RemoveFromParent();
-	PCharacter->PauseMenu = nullptr;
+	if (PCharacter->PauseMenu)
+	{
+		// Remove Pause Menu from the screen
+		PCharacter->PauseMenu->RemoveFromParent();
+		PCharacter->PauseMenu = nullptr;
 
-	// Set input mode to Game and hide the mouse cursor
-	FInputModeGameOnly InputMode;
-	PController->SetInputMode(InputMode);
-	PController->SetShowMouseCursor(false);
+		// Set input mode to Game and hide the mouse cursor
+		FInputModeGameOnly InputMode;
+		PController->SetInputMode(InputMode);
+		PController->SetShowMouseCursor(false);
 
-	// Set game to unpaused
-	UGameplayStatics::SetGamePaused(GetWorld(), false);
-	PCharacter->bInPauseMenu = false;
+		// Set game to unpaused
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		PCharacter->bInPauseMenu = false;
+	}
 }
